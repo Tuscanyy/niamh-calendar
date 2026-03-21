@@ -201,7 +201,7 @@ body { font-family:var(--body); background:var(--cream); color:var(--ink); min-h
 //  CLOUDFLARE WORKER URL — your personal calendar proxy
 //  Update this if you redeploy the worker
 // ============================================================
-const CALENDAR_URL = 'https://restless-bonus-0f82.daniel-c-j-moore.workers.dev/';
+const CALENDAR_URL = 'https://dawn-boat-9c07.daniel-c-j-moore.workers.dev/';
 // ============================================================
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -222,27 +222,17 @@ async function loadCalendar(url) {
   url = url || CALENDAR_URL;
   screens('screen-loading');
   try {
-    console.log('[cal] fetching:', url);
-    const res = await fetch(url, { mode: 'cors' });
-    console.log('[cal] status:', res.status, res.statusText);
-    const ct = res.headers.get('content-type');
-    console.log('[cal] content-type:', ct);
-    if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + res.statusText);
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const text = await res.text();
-    console.log('[cal] got', text.length, 'chars');
-    console.log('[cal] first 300:', text.slice(0,300));
-    if (!text.includes('BEGIN:VCALENDAR')) throw new Error('Not valid iCal. Got: ' + text.slice(0,120));
+    if (!text.includes('BEGIN:VCALENDAR')) throw new Error('Invalid response: ' + text.slice(0,80));
     allEvents = parseICS(text);
-    console.log('[cal] parsed', allEvents.length, 'events:', allEvents.map(e=>e.summary));
     const m = text.match(/X-WR-CALNAME:([^\r\n]+)/);
     renderDashboard(m ? m[1].trim() : "Niamh's Calendar");
   } catch(e) {
-    console.error('[cal] FAILED:', e.name, e.message, e.stack);
     screens('screen-error');
-    document.getElementById('err-msg').innerHTML =
-      '<b>' + e.name + ': ' + e.message + '</b><br><br>' +
-      'Press F12 → Console and look for <b>[cal]</b> lines for the exact error.';
-    document.getElementById('err-url').textContent = url;
+    document.getElementById('err-msg').innerHTML = '<b>' + e.message + '</b><br><br>Worker URL: ' + url + '<br><br>If this says "Failed to fetch", the worker CORS headers are the issue. Update the Cloudflare worker with the new code below.';
+    document.getElementById('err-url').textContent = '';
   }
 }
 
