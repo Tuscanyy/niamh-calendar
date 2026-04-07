@@ -3,272 +3,739 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Niamh's Calendar ✨</title>
-<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+<title>Niamh's Trail Log ✦</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Special+Elite&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
 :root {
-  --yellow:#FFE135; --pink:#FF5DAB; --blue:#3B82F6; --green:#22C55E;
-  --orange:#FF7A1A; --purple:#A855F7; --red:#EF4444; --teal:#06B6D4;
-  --cream:#FFFBEF; --ink:#1a1a1a;
-  --outline:2.5px solid #1a1a1a; --shadow:4px 4px 0 #1a1a1a; --shadow-lg:6px 6px 0 #1a1a1a;
-  --display:'Boogaloo',cursive; --body:'Nunito',sans-serif; --radius:12px;
+  --dusk1:#F2E8D5;   /* warm paper — main bg */
+  --dusk2:#E8D9BC;   /* slightly darker paper */
+  --orange:#E8622A;  /* firewatch orange — hero accent */
+  --amber:#C4520A;   /* deeper orange for text */
+  --peach:#D4784A;   /* mid orange */
+  --sage:#7A9E7E;    /* muted sage */
+  --pine:#3D2B1A;    /* deep ink brown */
+  --paper:#FAF3E4;   /* lightest paper */
+  --paper2:#EDE0C4;  /* mid paper */
+  --ink:#2A1A08;     /* dark ink */
+  --faded:#8B6B45;   /* faded ink */
+  --cream:#FAF3E4;
+  --display:'Playfair Display',serif;
+  --type:'Special Elite',cursive;
+  --hand:'Caveat',cursive;
 }
-body { font-family:var(--body); background:var(--cream); color:var(--ink); min-height:100vh;
-  background-image:radial-gradient(circle,#1a1a1a 1px,transparent 1px);
-  background-size:28px 28px; background-attachment:fixed; }
 
-#screen-loading { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; }
-.load-box { background:var(--yellow); border:var(--outline); box-shadow:var(--shadow-lg); border-radius:var(--radius); padding:2rem 3rem; text-align:center; }
-.load-title { font-family:var(--display); font-size:2.2rem; color:var(--ink); margin-bottom:8px; }
-.load-sub { font-size:13px; color:var(--ink); opacity:.7; }
-.bouncers { display:flex; gap:8px; justify-content:center; margin-top:16px; }
-.bouncer { width:12px; height:12px; border-radius:50%; border:2px solid var(--ink); animation:bounce .8s ease-in-out infinite; }
-.bouncer:nth-child(1){background:var(--pink);}
-.bouncer:nth-child(2){background:var(--blue);animation-delay:.15s;}
-.bouncer:nth-child(3){background:var(--green);animation-delay:.3s;}
-@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+body {
+  font-family: var(--type);
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
 
-#screen-error { display:none; min-height:100vh; align-items:center; justify-content:center; flex-direction:column; gap:16px; padding:2rem; text-align:center; }
-.err-box { background:var(--pink); border:var(--outline); box-shadow:var(--shadow-lg); border-radius:var(--radius); padding:2rem; max-width:480px; color:white; }
-.err-emoji { font-size:3rem; }
-.err-title { font-family:var(--display); font-size:1.8rem; margin:8px 0; }
-.err-msg { font-size:13px; opacity:.85; line-height:1.6; margin-bottom:12px; }
-.err-url { font-size:10px; background:rgba(255,255,255,.25); border-radius:6px; padding:6px 10px; word-break:break-all; margin-bottom:12px; }
-.btn { font-family:var(--display); font-size:1rem; background:var(--yellow); color:var(--ink); border:var(--outline); box-shadow:var(--shadow); border-radius:8px; padding:8px 16px; cursor:pointer; transition:transform .1s,box-shadow .1s; white-space:nowrap; }
-.btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 #1a1a1a;}
-.btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #1a1a1a;}
-.btn.blue{background:var(--blue);color:white;}
-.retry-row{display:flex;gap:8px;width:100%;max-width:480px;}
-.retry-row input{flex:1;border:2px solid var(--ink);border-radius:8px;padding:8px 12px;font-family:var(--body);font-size:12px;background:white;}
+/* ═══ TOPO BACKGROUND ═══ */
+.topo-bg {
+  position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+}
+.topo-bg svg { width: 100%; height: 100%; }
 
-#screen-dashboard { display:none; }
-.topbar { background:var(--pink); border-bottom:var(--outline); padding:.875rem 1.5rem; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
-.topbar-title { font-family:var(--display); font-size:1.8rem; color:white; text-shadow:2px 2px 0 var(--ink); display:flex; align-items:center; gap:10px; }
-.cal-chip { background:white; border:2px solid var(--ink); border-radius:20px; padding:3px 10px; font-size:11px; font-weight:800; color:var(--ink); }
-.topbar-right { display:flex; gap:8px; align-items:center; }
-.updated-pill { background:rgba(255,255,255,.3); border:2px solid rgba(255,255,255,.6); border-radius:20px; padding:3px 10px; font-size:11px; color:white; font-weight:600; }
-.btn-sm { font-family:var(--display); font-size:.85rem; background:var(--yellow); color:var(--ink); border:2px solid var(--ink); box-shadow:3px 3px 0 var(--ink); border-radius:6px; padding:5px 12px; cursor:pointer; transition:transform .1s,box-shadow .1s; }
-.btn-sm:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink);}
-.btn-sm:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink);}
+/* ═══ LOADING ═══ */
+#screen-loading {
+  position: relative; z-index: 10;
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 24px;
+  background: var(--paper);
+}
+.compass-loader {
+  width: 80px; height: 80px; position: relative;
+}
+.compass-ring {
+  width: 100%; height: 100%; border-radius: 50%;
+  border: 3px solid var(--amber);
+  box-shadow: 0 0 20px rgba(240,165,0,.3), inset 0 0 20px rgba(240,165,0,.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem;
+}
+.compass-needle {
+  position: absolute; top: 50%; left: 50%;
+  width: 3px; height: 32px; margin-left: -1.5px; margin-top: -28px;
+  background: linear-gradient(to bottom, var(--orange) 50%, var(--faded) 50%);
+  border-radius: 2px; transform-origin: bottom center;
+  animation: spin-needle 2s ease-in-out infinite;
+}
+@keyframes spin-needle { 0%,100%{transform:rotate(-20deg)} 50%{transform:rotate(20deg)} }
+.load-title { font-family:var(--display); font-size:2rem; font-style:italic; color:var(--orange); letter-spacing:.05em; }
+.load-sub { font-family:var(--hand); font-size:1.1rem; color:var(--faded); }
 
-.page { max-width:1200px; margin:0 auto; padding:1.5rem; display:grid; grid-template-columns:300px 1fr; gap:1.25rem; align-items:start; }
-.sidebar{display:flex;flex-direction:column;gap:1rem;}
-.main{display:flex;flex-direction:column;gap:1rem;}
+/* ═══ ERROR ═══ */
+#screen-error {
+  display:none; min-height:100vh; position:relative; z-index:10;
+  align-items:center; justify-content:center; flex-direction:column; gap:16px; padding:2rem; text-align:center;
+}
+.err-box { background:var(--paper); border:2px solid var(--orange); color:var(--ink); border-radius:4px; padding:2rem; max-width:480px; box-shadow:6px 6px 0 rgba(0,0,0,.3); }
+.err-title { font-family:var(--display); font-size:1.5rem; color:var(--orange); margin-bottom:.5rem; }
+.err-msg { font-size:13px; line-height:1.7; margin-bottom:12px; color:var(--faded); }
+.err-url { font-size:10px; background:var(--paper2); padding:6px 10px; border-radius:3px; word-break:break-all; margin-bottom:12px; }
+.trail-btn { font-family:var(--type); font-size:1rem; background:var(--orange); color:var(--paper); border:2px solid var(--ink); padding:8px 20px; cursor:pointer; letter-spacing:.05em; transition:transform .1s, box-shadow .1s; box-shadow:3px 3px 0 var(--ink); }
+.trail-btn:hover { transform:translate(-2px,-2px); box-shadow:5px 5px 0 var(--ink); }
+.retry-row { display:flex; gap:8px; width:100%; max-width:480px; }
+.retry-row input { flex:1; background:var(--paper); border:2px solid var(--faded); padding:8px 12px; font-family:var(--type); font-size:12px; color:var(--ink); }
 
-.card { background:white; border:var(--outline); box-shadow:var(--shadow); border-radius:var(--radius); padding:1.1rem; }
-.card-yellow{background:var(--yellow);}
-.card-pink{background:var(--pink);color:white;}
-.card-blue{background:var(--blue);color:white;}
-.card-green{background:var(--green);color:white;}
-.card-purple{background:var(--purple);color:white;}
-.card-orange{background:var(--orange);color:white;}
-.card-teal{background:var(--teal);color:white;}
-.card-label{font-family:var(--display);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;opacity:.7;margin-bottom:6px;}
+/* ═══ DASHBOARD ═══ */
+#screen-dashboard { display:none; position:relative; z-index:10; }
 
-.next-card{background:var(--yellow);border:var(--outline);box-shadow:var(--shadow-lg);border-radius:var(--radius);padding:1.25rem;}
-.next-countdown{display:inline-block;background:var(--ink);color:var(--yellow);font-family:var(--display);font-size:.9rem;border-radius:20px;padding:2px 12px;margin-bottom:8px;}
-.next-title{font-family:var(--display);font-size:1.6rem;line-height:1.1;margin-bottom:10px;color:var(--ink);}
-.next-meta{font-size:12px;color:var(--ink);opacity:.75;margin-bottom:3px;display:flex;align-items:center;gap:6px;}
+/* ═══ TOPBAR — like a ranger station header ═══ */
+.topbar {
+  background: var(--paper2);
+  border-bottom: 2px solid var(--orange);
+  padding: 1rem 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 12px rgba(44,26,8,.15);
+}
+.topbar-brand { display:flex; align-items:center; gap:16px; }
+.topbar-compass { font-size:1.5rem; animation: slow-spin 20s linear infinite; display:inline-block; }
+@keyframes slow-spin { to { transform: rotate(360deg); } }
+.topbar-title { font-family:var(--display); font-size:1.4rem; font-style:italic; color:var(--orange); letter-spacing:.04em; }
+.topbar-sub { font-family:var(--hand); font-size:.85rem; color:var(--faded); }
+.topbar-right { display:flex; align-items:center; gap:12px; }
+.coord-pill { font-family:var(--type); font-size:10px; color:var(--faded); letter-spacing:.08em; }
+.ranger-btn { font-family:var(--type); font-size:.8rem; background:transparent; color:var(--orange); border:1px solid var(--orange); padding:5px 14px; cursor:pointer; letter-spacing:.06em; transition:background .2s, color .2s; }
+.ranger-btn:hover { background:var(--orange); color:var(--paper); }
 
-.sticker-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.sticker{border:var(--outline);box-shadow:var(--shadow);border-radius:var(--radius);padding:1rem .875rem;text-align:center;transition:transform .15s,box-shadow .15s;}
-.sticker:hover{transform:translate(-2px,-2px) rotate(-1deg);box-shadow:6px 6px 0 var(--ink);}
-.sticker-val{font-family:var(--display);font-size:2.4rem;line-height:1;margin-bottom:2px;}
-.sticker-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;opacity:.75;}
+/* ═══ HERO ═══ */
+.hero {
+  position: relative; width:100%; height:500px; overflow:hidden;
+  border-bottom: 2px solid var(--amber);
+}
+.hero-slide { position:absolute; inset:0; background-size:cover; background-position:center; opacity:0; transition:opacity 1.2s ease; }
+.hero-slide.active { opacity:1; }
+.hero-overlay {
+  position:absolute; inset:0;
+  background: linear-gradient(to bottom,
+    rgba(45,27,51,.2) 0%,
+    rgba(45,27,51,.0) 30%,
+    rgba(45,27,51,.7) 75%,
+    rgba(45,27,51,.95) 100%);
+}
+.hero-content { position:absolute; bottom:0; left:0; right:0; padding:2rem 2.5rem; display:flex; align-items:flex-end; justify-content:space-between; }
+.hero-text-wrap {}
+.hero-eyebrow { font-family:var(--type); font-size:.75rem; letter-spacing:.2em; color:rgba(242,232,213,.8); margin-bottom:6px; }
+.hero-title { font-family:var(--display); font-size:3.2rem; font-style:italic; color:var(--paper); line-height:1; margin-bottom:6px; text-shadow:2px 2px 20px rgba(0,0,0,.5); }
+.hero-sub { font-family:var(--hand); font-size:1.2rem; color:var(--peach); }
+.hero-nav-wrap { display:flex; flex-direction:column; align-items:center; gap:8px; }
+.hero-dots { display:flex; gap:6px; }
+.hero-dot { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,.3); border:1px solid var(--amber); cursor:pointer; transition:background .2s; }
+.hero-dot.active { background:var(--orange); }
+.hero-arrows { display:flex; gap:6px; }
+.hero-arrow { background:rgba(232,98,42,.2); border:1px solid var(--orange); color:var(--paper); width:32px; height:32px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .2s; font-size:.9rem; }
+.hero-arrow:hover { background:var(--orange); color:var(--paper); }
+.hero-placeholder { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; }
+.ph-title { font-family:var(--display); font-size:2rem; font-style:italic; color:var(--amber); }
+.ph-sub { font-family:var(--hand); font-size:1.1rem; color:var(--peach); opacity:.7; }
+.ph-hint { font-family:var(--type); font-size:11px; color:var(--faded); border:1px dashed var(--faded); padding:8px 16px; letter-spacing:.05em; }
 
-.lb-list{display:flex;flex-direction:column;gap:6px;}
-.lb-row{display:flex;align-items:center;gap:8px;background:white;border:2px solid var(--ink);border-radius:8px;padding:7px 10px;transition:transform .1s;color:var(--ink);}
-.lb-row:hover{transform:translateX(3px);}
-.lb-medal{font-size:14px;flex-shrink:0;width:20px;text-align:center;}
-.lb-name{flex:1;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.lb-bar-wrap{width:50px;flex-shrink:0;}
-.lb-bar-track{height:4px;background:#eee;border-radius:2px;overflow:hidden;border:1px solid var(--ink);}
-.lb-bar-fill{height:100%;border-radius:2px;}
-.lb-n{font-size:11px;font-weight:800;width:20px;text-align:right;flex-shrink:0;}
+/* ═══ CREW — like trail photo pinboard ═══ */
+.crew-section { padding:2rem 1.5rem 1rem; max-width:1200px; margin:0 auto; background:var(--paper); }
+.section-eyebrow { font-family:var(--type); font-size:.7rem; letter-spacing:.2em; color:var(--faded); margin-bottom:4px; }
+.section-title { font-family:var(--display); font-size:1.8rem; font-style:italic; color:var(--ink); margin-bottom:1.5rem; }
+.crew-grid { display:grid; grid-template-columns:1.35fr 1fr 1fr 1fr 1fr; gap:1.25rem; align-items:start; }
 
-.event-list{display:flex;flex-direction:column;gap:7px;}
-.event-item{display:flex;align-items:flex-start;gap:10px;background:white;border:2px solid var(--ink);border-radius:10px;padding:.75rem .875rem;transition:transform .1s,box-shadow .1s;}
-.event-item:hover{transform:translate(-2px,-2px);box-shadow:var(--shadow);}
-.ev-badge{flex-shrink:0;border:2px solid var(--ink);border-radius:8px;padding:5px 7px;text-align:center;min-width:38px;font-weight:800;}
-.ev-day{font-family:var(--display);font-size:1.1rem;line-height:1;}
-.ev-mon{font-size:9px;text-transform:uppercase;opacity:.7;}
-.ev-info{flex:1;min-width:0;}
-.ev-name{font-size:13px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.ev-time{font-size:11px;opacity:.65;margin-top:2px;font-weight:600;}
-.ev-pip{width:8px;height:8px;border-radius:50%;border:2px solid var(--ink);flex-shrink:0;margin-top:5px;}
+/* Polaroid — worn field photo */
+.polaroid {
+  background: var(--paper);
+  border: 1px solid var(--paper2);
+  padding: .875rem .875rem .5rem;
+  box-shadow: 4px 4px 12px rgba(0,0,0,.4), 0 0 0 1px rgba(0,0,0,.1);
+  position: relative; color: var(--ink);
+  transition: transform .2s, box-shadow .2s;
+}
+.polaroid::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,.08) 0%,transparent 60%); pointer-events:none; }
+.polaroid:nth-child(1) { transform:rotate(-1.5deg); }
+.polaroid:nth-child(2) { transform:rotate(-2.5deg); }
+.polaroid:nth-child(3) { transform:rotate(2deg); }
+.polaroid:nth-child(4) { transform:rotate(-1deg); }
+.polaroid:nth-child(5) { transform:rotate(1.5deg); }
+.polaroid:hover { transform:rotate(0) scale(1.04)!important; box-shadow:8px 8px 20px rgba(0,0,0,.5); z-index:10; }
+.polaroid.star { box-shadow:0 0 0 2px var(--amber), 6px 6px 16px rgba(0,0,0,.5); }
+.polaroid-photo { width:100%; aspect-ratio:1; background:var(--paper2); overflow:hidden; margin-bottom:.75rem; }
+.polaroid-photo img { width:100%; height:100%; object-fit:cover; display:block; filter:sepia(.1) contrast(1.05); }
+.polaroid-photo { position:relative; overflow:hidden; }
+.polaroid-photo .photo-hidden { position:absolute; inset:0; opacity:0; transition:opacity .35s ease; }
+.polaroid-photo .photo-main { transition:opacity .35s ease; }
+.polaroid:hover .photo-main { opacity:0; }
+.polaroid:hover .photo-hidden { opacity:1; }
+.polaroid-photo-placeholder { width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3.5rem;background:linear-gradient(135deg,var(--paper2),var(--paper)); }
+.birthday-tag { display:inline-block; background:var(--orange); color:var(--paper); font-family:var(--type); font-size:.7rem; letter-spacing:.12em; padding:2px 10px; margin-bottom:6px; transform:rotate(-1.5deg); box-shadow:2px 2px 0 rgba(0,0,0,.2); }
+.polaroid-name { font-family:var(--display); font-size:1.4rem; font-weight:700; color:var(--ink); margin-bottom:1px; }
+.polaroid.star .polaroid-name { font-size:1.8rem; }
+.polaroid-subtitle { font-family:var(--hand); font-size:.95rem; color:var(--faded); margin-bottom:.4rem; }
+.quote-bubble { background:var(--paper); border-left:3px solid var(--orange); padding:.4rem .6rem; margin-bottom:.4rem; font-family:var(--hand); font-size:1rem; line-height:1.4; color:var(--ink); display:none; box-shadow:2px 2px 0 rgba(44,26,8,.08); }
+.quote-bubble.active { display:block; }
+.polaroid:nth-child(1) .quote-bubble { border-color:var(--orange); }
+.polaroid:nth-child(2) .quote-bubble { border-color:var(--amber); }
+.polaroid:nth-child(3) .quote-bubble { border-color:var(--sage); }
+.polaroid:nth-child(4) .quote-bubble { border-color:var(--peach); }
+.polaroid:nth-child(5) .quote-bubble { border-color:var(--pine); }
+.quote-nav { display:flex; gap:5px; justify-content:center; margin-top:.4rem; }
+.q-dot { width:5px; height:5px; border-radius:50%; background:var(--paper2); border:1px solid var(--faded); cursor:pointer; transition:background .2s; }
+.q-dot.active { background:var(--faded); }
 
-.month-chart-wrap{display:grid;grid-template-columns:repeat(12,1fr);gap:5px;align-items:end;}
-.month-col{display:flex;flex-direction:column;align-items:center;gap:4px;}
-.month-bar-outer{width:100%;height:70px;display:flex;align-items:flex-end;justify-content:center;}
-.month-bar-el{width:60%;border:2px solid var(--ink);border-radius:4px 4px 0 0;min-height:3px;}
-.month-lbl{font-size:8px;font-weight:800;text-transform:uppercase;opacity:.6;}
-.month-n{font-size:10px;font-weight:800;}
+/* ═══ MAIN LAYOUT ═══ */
+.page { max-width:1200px; margin:0 auto; padding:1.5rem; display:grid; grid-template-columns:280px 1fr; gap:1.5rem; align-items:start; }
 
-.dow-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
-.dow-cell{border:2px solid var(--ink);border-radius:8px;padding:8px 4px;text-align:center;transition:transform .1s;}
-.dow-cell:hover{transform:scale(1.08) rotate(-2deg);}
-.dow-day-lbl{font-size:8px;font-weight:800;text-transform:uppercase;opacity:.6;margin-bottom:4px;}
-.dow-n{font-family:var(--display);font-size:1.3rem;}
+/* ═══ SIDEBAR — ranger station board ═══ */
+.sidebar { display:flex; flex-direction:column; gap:1rem; }
 
-.dur-list{display:flex;flex-direction:column;gap:8px;}
-.dur-row{display:flex;align-items:center;gap:8px;}
-.dur-lbl{width:68px;font-size:11px;font-weight:800;flex-shrink:0;}
-.dur-track{flex:1;height:8px;background:rgba(0,0,0,.1);border:2px solid var(--ink);border-radius:4px;overflow:hidden;}
-.dur-fill{height:100%;border-radius:2px;}
-.dur-n{font-size:11px;font-weight:800;width:20px;text-align:right;flex-shrink:0;}
+/* Next event — trail marker style */
+.next-card {
+  background: var(--paper2);
+  border: 2px solid var(--orange); padding: 1.25rem;
+  box-shadow: 4px 4px 0 rgba(44,26,8,.15);
+  position: relative; overflow: hidden;
+}
+.next-card::before { content:''; position:absolute; top:-40px; right:-40px; width:120px; height:120px; border-radius:50%; border:1px solid rgba(240,165,0,.1); }
+.next-card::after { content:''; position:absolute; top:-20px; right:-20px; width:80px; height:80px; border-radius:50%; border:1px solid rgba(240,165,0,.08); }
+.next-eyebrow { font-family:var(--type); font-size:.65rem; letter-spacing:.2em; color:var(--faded); margin-bottom:4px; }
+.next-countdown { font-family:var(--display); font-size:1rem; font-style:italic; color:var(--orange); margin-bottom:8px; }
+.next-title { font-family:var(--display); font-size:1.4rem; font-style:italic; color:var(--ink); line-height:1.2; margin-bottom:10px; }
+.next-meta { font-family:var(--type); font-size:.75rem; color:var(--faded); margin-bottom:4px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; letter-spacing:.04em; }
+.next-meta-icon { opacity:.6; }
 
-.tag-cloud{display:flex;flex-wrap:wrap;gap:6px;}
-.tag{border:2px solid var(--ink);border-radius:20px;padding:3px 10px;font-weight:800;font-size:11px;transition:transform .1s;cursor:default;}
-.tag:hover{transform:scale(1.1) rotate(-2deg);}
-.tag.xl{font-size:15px;padding:4px 12px;}
-.tag.lg{font-size:12px;}
+/* Waypoint stat cards */
+.waypoints { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.waypoint {
+  background: var(--paper2); border:1px solid var(--orange);
+  padding:.875rem; text-align:center;
+  transition: border-color .2s, background .2s;
+}
+.waypoint:hover { border-color:var(--amber); background:var(--paper); }
+.waypoint-val { font-family:var(--display); font-size:2rem; font-style:italic; color:var(--orange); line-height:1; margin-bottom:2px; }
+.waypoint-lbl { font-family:var(--type); font-size:.6rem; letter-spacing:.15em; color:var(--faded); text-transform:uppercase; }
 
-.sec-title{font-family:var(--display);font-size:1.4rem;margin-bottom:.6rem;display:flex;align-items:center;gap:8px;}
-.no-data{font-size:12px;font-weight:600;opacity:.6;padding:.5rem 0;}
+/* Leaderboard — expedition log */
+.explog { background:var(--paper2); border:1px solid var(--orange); padding:1rem; }
+.explog-title { font-family:var(--type); font-size:.65rem; letter-spacing:.2em; color:var(--faded); margin-bottom:.75rem; }
+.lb-row { display:flex; align-items:center; gap:8px; padding:5px 0; border-bottom:1px solid rgba(44,26,8,.08); }
+.lb-row:last-child { border-bottom:none; }
+.lb-medal { font-size:12px; width:18px; flex-shrink:0; }
+.lb-name { flex:1; font-family:var(--type); font-size:.8rem; color:var(--ink); letter-spacing:.03em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.lb-track { flex:1; height:3px; background:rgba(255,255,255,.08); overflow:hidden; }
+.lb-fill { height:100%; background:linear-gradient(to right, var(--orange), var(--peach)); }
+.lb-n { font-family:var(--type); font-size:.75rem; color:var(--orange); width:20px; text-align:right; flex-shrink:0; }
 
-@keyframes pop-in{from{transform:scale(.8) rotate(-3deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
-.pop{animation:pop-in .3s cubic-bezier(.34,1.56,.64,1) both;}
-.pop-d1{animation-delay:.05s;}.pop-d2{animation-delay:.1s;}.pop-d3{animation-delay:.15s;}.pop-d4{animation-delay:.2s;}
+/* ═══ CONTENT — field notes ═══ */
+.main { display:flex; flex-direction:column; gap:1rem; }
 
-@media(max-width:720px){.page{grid-template-columns:1fr;}.month-chart-wrap{grid-template-columns:repeat(6,1fr);}}
+/* Field note card */
+.field-card { background:var(--paper2); border:1px solid rgba(44,26,8,.15); padding:1.25rem; position:relative; }
+.field-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:linear-gradient(to bottom,var(--orange),var(--peach)); }
+.field-title { font-family:var(--display); font-size:1.2rem; font-style:italic; color:var(--orange); margin-bottom:1rem; padding-left:.5rem; display:flex; align-items:center; gap:8px; }
+
+/* Event items — waypoints on a trail */
+.event-list { display:flex; flex-direction:column; gap:6px; }
+.event-item {
+  display:flex; align-items:flex-start; gap:10px;
+  background:var(--paper); border:1px solid rgba(44,26,8,.12);
+  padding:.75rem 1rem; transition:background .2s, border-color .2s;
+  position:relative;
+}
+.event-item:hover { background:var(--paper2); border-color:var(--orange); }
+.ev-marker { flex-shrink:0; display:flex; flex-direction:column; align-items:center; }
+.ev-date-box { border:1px solid var(--orange); padding:4px 8px; text-align:center; min-width:36px; background:rgba(232,98,42,.08); }
+.ev-day { font-family:var(--display); font-size:1rem; font-style:italic; color:var(--orange); line-height:1; }
+.ev-mon { font-family:var(--type); font-size:.55rem; letter-spacing:.12em; color:var(--faded); text-transform:uppercase; }
+.ev-info { flex:1; min-width:0; }
+.ev-name { font-family:var(--display); font-size:.95rem; font-style:italic; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ev-time { font-family:var(--type); font-size:.7rem; color:var(--faded); margin-top:2px; letter-spacing:.04em; }
+.ev-avatars { display:flex; gap:3px; margin-top:5px; }
+.ev-pip { width:6px; height:6px; border-radius:50%; background:var(--amber); opacity:.6; flex-shrink:0; margin-top:6px; }
+
+/* Ideas — like pinned notes on a corkboard */
+.ideas-list { display:flex; flex-direction:column; gap:8px; }
+.idea-item {
+  background: var(--paper); border-left:3px solid var(--peach);
+  padding:.6rem 1rem; font-family:var(--hand); font-size:1.1rem; color:var(--ink);
+  transition:background .15s, border-color .15s; cursor:default; letter-spacing:.01em;
+}
+.idea-item:hover { background:var(--paper2); border-left-color:var(--orange); }
+
+/* No data */
+.no-data { font-family:var(--type); font-size:.8rem; color:var(--faded); letter-spacing:.06em; padding:.5rem 0; opacity:.7; }
+
+/* Divider */
+.trail-divider { border:none; border-top:1px solid rgba(44,26,8,.12); margin:0; }
+
+/* Avatar circle */
+.av { border-radius:50%; border:1px solid var(--amber); object-fit:cover; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; font-weight:700; vertical-align:middle; }
+
+@keyframes pop-in { from{transform:scale(.85);opacity:0} to{transform:scale(1);opacity:1} }
+.pop { animation:pop-in .4s cubic-bezier(.34,1.2,.64,1) both; }
+.pop-d1{animation-delay:.06s}.pop-d2{animation-delay:.12s}.pop-d3{animation-delay:.18s}
+
+.ideas-section {
+  background: var(--orange);
+  border-top: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+  padding: 1.5rem 2rem;
+}
+.ideas-section-inner { max-width:1200px; margin:0 auto; }
+.ideas-eyebrow { font-family:var(--type); font-size:.65rem; letter-spacing:.2em; color:rgba(255,255,255,.7); margin-bottom:1rem; }
+.ideas-row { display:flex; gap:1rem; }
+.idea-card {
+  flex:1; background:var(--paper); border:2.5px solid var(--ink);
+  box-shadow:4px 4px 0 var(--ink);
+  padding:1.25rem 1rem; display:flex; flex-direction:column; align-items:center;
+  gap:.5rem; text-align:center; cursor:default;
+  transition:transform .15s, box-shadow .15s;
+}
+.idea-card:hover { transform:translate(-3px,-3px); box-shadow:7px 7px 0 var(--ink); }
+.idea-icon { font-size:2.2rem; line-height:1; }
+.idea-label { font-family:var(--display); font-size:1rem; font-style:italic; color:var(--ink); line-height:1.2; }
+.idea-sub { display:block; font-family:var(--type); font-size:.65rem; letter-spacing:.06em; color:var(--faded); margin-top:3px; font-style:normal; }
+
+@media(max-width:1100px) { .crew-grid{grid-template-columns:1fr 1fr 1fr} }
+@media(max-width:720px) {
+  .page{grid-template-columns:1fr}
+  .crew-grid{grid-template-columns:1fr 1fr}
+  .hero{height:360px} .hero-title{font-size:2.2rem}
+}
+@media(max-width:480px) { .crew-grid{grid-template-columns:1fr} .ideas-row{flex-direction:column} }
 </style>
 </head>
 <body>
 
-<div id="screen-loading">
-  <div class="load-box pop">
-    <div class="load-title">Niamh's Calendar ✨</div>
-    <div class="load-sub">grabbing all the good stuff…</div>
-    <div class="bouncers"><div class="bouncer"></div><div class="bouncer"></div><div class="bouncer"></div></div>
-  </div>
+<!-- Topo background -->
+<div class="topo-bg">
+  <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" style="opacity:.12">
+    <defs>
+      <style>.tl{fill:none;stroke:#C4520A;stroke-width:.8}</style>
+    </defs>
+    <!-- Topo contour lines -->
+    <ellipse class="tl" cx="600" cy="400" rx="550" ry="350"/>
+    <ellipse class="tl" cx="600" cy="400" rx="480" ry="300"/>
+    <ellipse class="tl" cx="600" cy="400" rx="410" ry="250"/>
+    <ellipse class="tl" cx="600" cy="400" rx="340" ry="200"/>
+    <ellipse class="tl" cx="600" cy="400" rx="270" ry="150"/>
+    <ellipse class="tl" cx="600" cy="400" rx="200" ry="100"/>
+    <ellipse class="tl" cx="600" cy="400" rx="130" ry="60"/>
+    <ellipse class="tl" cx="200" cy="150" rx="200" ry="130"/>
+    <ellipse class="tl" cx="200" cy="150" rx="150" ry="95"/>
+    <ellipse class="tl" cx="200" cy="150" rx="100" ry="60"/>
+    <ellipse class="tl" cx="200" cy="150" rx="50" ry="30"/>
+    <ellipse class="tl" cx="1000" cy="650" rx="220" ry="140"/>
+    <ellipse class="tl" cx="1000" cy="650" rx="160" ry="100"/>
+    <ellipse class="tl" cx="1000" cy="650" rx="100" ry="60"/>
+    <ellipse class="tl" cx="1000" cy="650" rx="50" ry="30"/>
+    <!-- Grid lines -->
+    <line class="tl" x1="0" y1="200" x2="1200" y2="200" stroke-width=".4" stroke-dasharray="4 8"/>
+    <line class="tl" x1="0" y1="400" x2="1200" y2="400" stroke-width=".4" stroke-dasharray="4 8"/>
+    <line class="tl" x1="0" y1="600" x2="1200" y2="600" stroke-width=".4" stroke-dasharray="4 8"/>
+    <line class="tl" x1="300" y1="0" x2="300" y2="800" stroke-width=".4" stroke-dasharray="4 8"/>
+    <line class="tl" x1="600" y1="0" x2="600" y2="800" stroke-width=".4" stroke-dasharray="4 8"/>
+    <line class="tl" x1="900" y1="0" x2="900" y2="800" stroke-width=".4" stroke-dasharray="4 8"/>
+  </svg>
 </div>
 
+<!-- LOADING -->
+<div id="screen-loading">
+  <div class="compass-loader">
+    <div class="compass-ring">🧭</div>
+    <div class="compass-needle"></div>
+  </div>
+  <div class="load-title">Niamh's Trail Log</div>
+  <div class="load-sub">plotting the route…</div>
+</div>
+
+<!-- ERROR -->
 <div id="screen-error">
   <div class="err-box pop">
-    <div class="err-emoji">😬</div>
-    <div class="err-title">uh oh!!</div>
-    <div class="err-msg" id="err-msg">Something went wrong loading the calendar.</div>
+    <div class="err-title">⚠ Trail Lost</div>
+    <div class="err-msg" id="err-msg">Couldn't reach the waypoint. Check your signal.</div>
     <div class="err-url" id="err-url"></div>
     <div class="retry-row">
-      <input type="text" id="retry-input" placeholder="paste a different URL…">
-      <button class="btn" onclick="retryInput()">go! →</button>
+      <input type="text" id="retry-input" placeholder="enter coordinates…">
+      <button class="trail-btn" onclick="retryInput()">SEARCH →</button>
     </div>
   </div>
-  <button class="btn blue" onclick="loadDemo()">✨ load demo instead</button>
+  <button class="trail-btn" onclick="loadDemo()">▸ Load Demo Expedition</button>
 </div>
 
+<!-- DASHBOARD -->
 <div id="screen-dashboard">
+
+  <!-- Topbar -->
   <div class="topbar">
-    <div class="topbar-title">✨ <span id="cal-name-display">Niamh's Calendar</span><span class="cal-chip" id="event-count-chip"></span></div>
+    <div class="topbar-brand">
+      <span class="topbar-compass">🧭</span>
+      <div>
+        <div class="topbar-title">Niamh's Trail Log</div>
+        <div class="topbar-sub">field dispatch — <span id="updated-at"></span></div>
+      </div>
+    </div>
     <div class="topbar-right">
-      <span class="updated-pill" id="updated-at"></span>
-      <button class="btn-sm" onclick="loadCalendar()">↺ refresh</button>
+      <div class="coord-pill" id="event-count-chip"></div>
+      <button class="ranger-btn" onclick="loadCalendar()">↺ SYNC</button>
     </div>
   </div>
+
+  <!-- Hero -->
+  <div class="hero" id="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-text-wrap">
+        <div class="hero-eyebrow">✦ EXPEDITION PHOTO LOG ✦</div>
+        <div class="hero-title">The Niamh Files</div>
+        <div class="hero-sub">a love letter in calendar form</div>
+      </div>
+      <div class="hero-nav-wrap">
+        <div class="hero-dots" id="hero-dots"></div>
+        <div class="hero-arrows">
+          <div class="hero-arrow" onclick="heroNav(-1)">◀</div>
+          <div class="hero-arrow" onclick="heroNav(1)">▶</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Crew -->
+  <div class="crew-section">
+    <div class="section-eyebrow">✦ EXPEDITION MEMBERS ✦</div>
+    <div class="section-title">The Crew</div>
+    <div class="crew-grid" id="crew-grid"></div>
+  </div>
+
+  <hr class="trail-divider">
+
+  <!-- Main -->
+  <!-- IDEAS SECTION -->
+  <div class="ideas-section">
+    <div class="ideas-section-inner">
+      <div class="ideas-eyebrow">✦ EXPEDITION IDEAS ✦</div>
+      <div class="ideas-row">
+        <div class="idea-card">
+          <div class="idea-icon">🪢</div>
+          <div class="idea-label">Shibari</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-icon">👗</div>
+          <div class="idea-label">Legally Blonde Musical<span class="idea-sub">(in Swedish)</span></div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-icon">🚴</div>
+          <div class="idea-label">Cycling Trip</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-icon">🌲</div>
+          <div class="idea-label">Cabin in the Woods</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="page">
     <div class="sidebar">
+
+      <!-- Next event -->
       <div class="next-card pop">
-        <div class="card-label">⚡ up next</div>
+        <div class="next-eyebrow">✦ NEXT WAYPOINT ✦</div>
         <div id="next-card-inner"></div>
       </div>
-      <div class="sticker-grid">
-        <div class="sticker card-yellow pop pop-d1"><div class="sticker-val" id="s-total">—</div><div class="sticker-lbl">total events</div></div>
-        <div class="sticker card-pink pop pop-d2"><div class="sticker-val" id="s-upcoming">—</div><div class="sticker-lbl">coming up</div></div>
-        <div class="sticker card-teal pop pop-d3"><div class="sticker-val" id="s-month">—</div><div class="sticker-lbl">this month</div></div>
-        <div class="sticker card-orange pop pop-d4"><div class="sticker-val" id="s-avg">—</div><div class="sticker-lbl">avg length</div></div>
+
+      <!-- Waypoints / stats -->
+      <div class="waypoints">
+        <div class="waypoint pop pop-d1"><div class="waypoint-val" id="s-total">—</div><div class="waypoint-lbl">logged</div></div>
+        <div class="waypoint pop pop-d2"><div class="waypoint-val" id="s-upcoming">—</div><div class="waypoint-lbl">ahead</div></div>
+        <div class="waypoint pop pop-d3"><div class="waypoint-val" id="s-month">—</div><div class="waypoint-lbl">this month</div></div>
       </div>
-      <div id="lb-wrap" style="display:none" class="card card-purple pop">
-        <div class="card-label">🏆 who shows up most</div>
-        <div class="lb-list" id="lb-list"></div>
+
+      <!-- Expedition log / leaderboard -->
+      <div class="explog pop" id="lb-wrap" style="display:none">
+        <div class="explog-title">✦ EXPEDITION LOG — WHO SHOWS UP ✦</div>
+        <div id="lb-list"></div>
       </div>
+
     </div>
+
     <div class="main">
-      <div class="card pop"><div class="sec-title">📅 what's coming up</div><div class="event-list" id="upcoming-list"></div></div>
-      <div class="card card-blue pop"><div class="sec-title" style="color:white">📊 events per month</div><div class="month-chart-wrap" id="month-chart"></div></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-        <div class="card card-green pop"><div class="sec-title" style="color:white">📆 busiest days</div><div class="dow-grid" id="dow-grid"></div></div>
-        <div class="card card-orange pop"><div class="sec-title" style="color:white">⏱️ how long?</div><div class="dur-list" id="dur-list"></div></div>
+      <div class="field-card pop">
+        <div class="field-title">📍 Upcoming Waypoints</div>
+        <div class="event-list" id="upcoming-list"></div>
       </div>
-      <div class="card card-yellow pop"><div class="sec-title">🏷️ what y'all talk about</div><div class="tag-cloud" id="tag-cloud"></div></div>
-      <div class="card pop"><div class="sec-title">🕰️ recently happened</div><div class="event-list" id="recent-list"></div></div>
+
+      <div class="field-card pop">
+        <div class="field-title">🕰 Past Expeditions</div>
+        <div class="event-list" id="recent-list"></div>
+      </div>
+
+
     </div>
   </div>
+
 </div>
 
 <script>
 // ============================================================
-//  CLOUDFLARE WORKER URL — your personal calendar proxy
-//  Update this if you redeploy the worker
+//  CALENDAR — Cloudflare worker URL
 // ============================================================
 const CALENDAR_URL = 'https://dawn-boat-9c07.daniel-c-j-moore.workers.dev/';
+
 // ============================================================
+//  SLIDESHOW — name photos 1.jpg, 2.jpeg, 3.png etc in photos/
+// ============================================================
+const MAX_PHOTOS = 1000;
 
-const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-const STOP   = new Set('the a an and or for of to in on at with is are was were be been have has had do does did will would could should may might can call sync meet catch up check out my our your their its this that these those am we us team all one two three review weekly monthly daily discussion chat by from re'.split(' '));
-const BADGE_COLORS = [{bg:'#FFE135',text:'#1a1a1a'},{bg:'#FF5DAB',text:'white'},{bg:'#3B82F6',text:'white'},{bg:'#22C55E',text:'white'},{bg:'#FF7A1A',text:'white'},{bg:'#A855F7',text:'white'},{bg:'#06B6D4',text:'white'},{bg:'#EF4444',text:'white'}];
-const BAR_COLORS  = ['#FFE135','#FF5DAB','#3B82F6','#22C55E','#FF7A1A','#A855F7','#06B6D4'];
-const MEDALS      = ['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣'];
-let allEvents = [];
+// ============================================================
+//  CREW
+// ============================================================
+const CREW = [
+  {
+    name: 'Niamh', photo:'niamh', emoji:'🌟', star:true, subtitle:'the main character',
+    quotes:[
+      "It's giving main character.",
+    ]
+  },
+  {
+    name: 'Dan', photo:'dan', emoji:'🧢', subtitle:'big dog',
+    quotes:[
+      "Niamh hates dogs and I still like her which says alot about how great she is.",
+      "Niamh is genuinely one of my favorite people and I value her opinion so much.",
+    ]
+  },
+  {
+    name: 'Rawan', photo:'rawan', emoji:'🌸', subtitle:'lebanese princess',
+    quotes:[
+      "Niamh cannot keep a secret to save her life and that's what makes her perfect.",
+      "Great abs though.",
+    ]
+  },
+  {
+    name: 'Youri', photo:'youri', emoji:'⚡', subtitle:'sensitive dutch boy',
+    quotes:[
+      "quotes coming soon… 👀",
+    ]
+  },
+  {
+    name: 'Clara', photo:'clara', emoji:'💕', subtitle:'the girlfriend',
+    quotes:[
+      "Niamh is great and I love her!",
+      "This picture has nothing to do with the movie The Lobster.",
+      "I'm thinking of calling the restaurant to order a cake but I don't know how long we'll stay there for hmmm.",
+    ]
+  },
+];
 
-function screens(show) {
-  document.getElementById('screen-loading').style.display  = show==='screen-loading'  ? 'flex'  : 'none';
-  document.getElementById('screen-error').style.display    = show==='screen-error'    ? 'flex'  : 'none';
-  document.getElementById('screen-dashboard').style.display= show==='screen-dashboard'? 'block' : 'none';
+// ============================================================
+//  AVATARS
+// ============================================================
+const AVATAR_MAP = { 'niamh':'niamh','dan':'dan','daniel':'dan','youri':'youri','rawan':'rawan','clara':'clara' };
+
+const EXTS=['jpg','jpeg','png'];
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MEDALS=['🥇','🥈','🥉','④','⑤','⑥','⑦','⑧'];
+let allEvents=[];
+
+// Screens
+function screens(id){
+  document.getElementById('screen-loading').style.display=id==='screen-loading'?'flex':'none';
+  document.getElementById('screen-error').style.display=id==='screen-error'?'flex':'none';
+  document.getElementById('screen-dashboard').style.display=id==='screen-dashboard'?'block':'none';
 }
 
-async function loadCalendar(url) {
-  url = url || CALENDAR_URL;
+// Image resolution
+function tryImage(folder,base,cb){
+  let i=0;
+  function next(){
+    if(i>=EXTS.length){cb(null);return;}
+    const url=folder+'/'+base+'.'+EXTS[i++];
+    const img=new Image();
+    img.onload=()=>cb(url);
+    img.onerror=next;
+    img.src=url;
+  }
+  next();
+}
+
+// Hero slideshow
+let heroIdx=0,heroTimer=null;
+function initHero(){
+  const heroEl=document.getElementById('hero');
+  const dotsEl=document.getElementById('hero-dots');
+  discoverPhotos(urls=>{
+    if(!urls.length){showHeroPlaceholder(heroEl);return;}
+    buildHero(heroEl,dotsEl,urls);
+  });
+}
+function discoverPhotos(cb){
+  const found=[];let n=1,misses=0;
+  function tryNext(){
+    if(n>MAX_PHOTOS||misses>=3){cb(found);return;}
+    const num=n++;
+    tryImage('photos',String(num),url=>{
+      if(url){found.push(url);misses=0;}else{misses++;}
+      tryNext();
+    });
+  }
+  tryNext();
+}
+function buildHero(heroEl,dotsEl,photos){
+  photos.forEach((src,i)=>{
+    const slide=document.createElement('div');
+    slide.className='hero-slide'+(i===0?' active':'');
+    slide.style.backgroundImage="url('"+src+"')";
+    heroEl.insertBefore(slide,heroEl.firstChild);
+  });
+  photos.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className='hero-dot'+(i===0?' active':'');
+    d.onclick=()=>goHero(i);
+    dotsEl.appendChild(d);
+  });
+  heroTimer=setInterval(()=>heroNav(1),5000);
+}
+function showHeroPlaceholder(heroEl){
+  const ph=document.createElement('div');
+  ph.className='hero-placeholder';
+  ph.innerHTML='<div class="ph-title">The Niamh Files</div><div class="ph-sub">add photos to photos/ folder</div><div class="ph-hint">name them 1.jpg, 2.jpg, 3.png etc.</div>';
+  heroEl.appendChild(ph);
+}
+function goHero(idx){
+  const slides=document.getElementById('hero').querySelectorAll('.hero-slide');
+  const dots=document.getElementById('hero-dots').querySelectorAll('.hero-dot');
+  if(!slides.length)return;
+  heroIdx=(idx+slides.length)%slides.length;
+  slides.forEach((s,i)=>s.classList.toggle('active',i===heroIdx));
+  dots.forEach((d,i)=>d.classList.toggle('active',i===heroIdx));
+}
+function heroNav(dir){
+  goHero(heroIdx+dir);
+  clearInterval(heroTimer);
+  heroTimer=setInterval(()=>heroNav(1),5000);
+}
+
+// Crew polaroids
+function initCrew(){
+  const grid=document.getElementById('crew-grid');
+  grid.innerHTML='';
+  CREW.forEach((person,pi)=>{
+    const card=document.createElement('div');
+    card.className='polaroid';
+    if(person.star)card.classList.add('star');
+    const quotesHtml=person.quotes.map((q,qi)=>'<div class="quote-bubble'+(qi===0?' active':'')+'" data-qi="'+qi+'">'+q+'</div>').join('');
+    const dotsHtml=person.quotes.map((_,qi)=>'<div class="q-dot'+(qi===0?' active':'')+'" onclick="setQuote(this,'+qi+')"></div>').join('');
+    card.innerHTML=
+      '<div class="polaroid-photo"><div class="polaroid-photo-placeholder">'+person.emoji+'</div></div>'+
+      (person.star?'<div style="text-align:center;margin-bottom:4px"><span class="birthday-tag">✦ BIRTHDAY GIRL ✦</span></div>':'')+
+      '<div class="polaroid-name">'+person.name+'</div>'+
+      (person.subtitle?'<div class="polaroid-subtitle">'+person.subtitle+'</div>':'')+
+      '<div>'+quotesHtml+'</div>'+
+      (person.quotes.length>1?'<div class="quote-nav">'+dotsHtml+'</div>':'');
+    grid.appendChild(card);
+    tryImage('avatars',person.photo,url=>{
+      if(url){
+        const ph=card.querySelector('.polaroid-photo');
+        // Also look for a _hidden variant for hover swap
+        tryImage('avatars',person.photo+'_hidden',hiddenUrl=>{
+          if(hiddenUrl){
+            ph.innerHTML='<img src="'+url+'" alt="'+person.name+'" class="photo-main"><img src="'+hiddenUrl+'" alt="'+person.name+' hidden" class="photo-hidden">';
+          } else {
+            ph.innerHTML='<img src="'+url+'" alt="'+person.name+'">';
+          }
+        });
+      }
+    });
+    if(person.quotes.length>1){
+      let qi=0;
+      setInterval(()=>{
+        qi=(qi+1)%person.quotes.length;
+        card.querySelectorAll('.quote-bubble').forEach((b,i)=>b.classList.toggle('active',i===qi));
+        card.querySelectorAll('.q-dot').forEach((d,i)=>d.classList.toggle('active',i===qi));
+      },3500+pi*600);
+    }
+  });
+}
+function setQuote(dotEl,idx){
+  const nav=dotEl.parentElement;
+  const quotes=nav.previousElementSibling;
+  quotes.querySelectorAll('.quote-bubble').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  nav.querySelectorAll('.q-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+}
+
+// Avatars
+function getAvatarBase(name){
+  const lower=(name||'').toLowerCase();
+  for(const[k,v]of Object.entries(AVATAR_MAP)){if(lower.includes(k))return v;}
+  return null;
+}
+function avatarEl(name,size){
+  size=size||26;
+  const colors=['#E8622A','#F0A500','#3B6B4F','#7A9E7E','#E8956D','#6B5B3E','#4A7B6F','#9B4A3A'];
+  const col=colors[Math.abs(hash(name||''))%colors.length];
+  const initials=(name||'?').split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const st='width:'+size+'px;height:'+size+'px;border-radius:50%;border:1px solid rgba(240,165,0,.5);flex-shrink:0;';
+  const uid='av-'+Math.random().toString(36).slice(2);
+  const fallback='<div id="'+uid+'" style="'+st+'background:'+col+';display:inline-flex;align-items:center;justify-content:center;font-size:'+Math.round(size*.38)+'px;font-weight:700;color:white;font-family:var(--hand)" title="'+name+'">'+initials+'</div>';
+  const base=getAvatarBase(name);
+  if(base){
+    setTimeout(()=>{
+      tryImage('avatars',base,url=>{
+        const el=document.getElementById(uid);
+        if(el&&url){
+          const img=document.createElement('img');
+          img.src=url;img.title=name;img.alt=name;
+          img.style.cssText=st+'object-fit:cover;display:inline-block;filter:sepia(.1);';
+          el.replaceWith(img);
+        }
+      });
+    },0);
+  }
+  return fallback;
+}
+
+// Load
+async function loadCalendar(url){
+  url=url||CALENDAR_URL;
   screens('screen-loading');
-  try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const text = await res.text();
-    if (!text.includes('BEGIN:VCALENDAR')) throw new Error('Invalid response: ' + text.slice(0,80));
-    allEvents = parseICS(text);
-    const m = text.match(/X-WR-CALNAME:([^\r\n]+)/);
-    renderDashboard(m ? m[1].trim() : "Niamh's Calendar");
-  } catch(e) {
+  try{
+    const res=await fetch(url);
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const text=await res.text();
+    if(!text.includes('BEGIN:VCALENDAR'))throw new Error('Invalid response: '+text.slice(0,80));
+    allEvents=parseICS(text);
+    const m=text.match(/X-WR-CALNAME:([^\r\n]+)/);
+    renderDashboard(m?m[1].trim():"Niamh's Trail Log");
+  }catch(e){
     screens('screen-error');
-    document.getElementById('err-msg').innerHTML = '<b>' + e.message + '</b><br><br>Worker URL: ' + url + '<br><br>If this says "Failed to fetch", the worker CORS headers are the issue. Update the Cloudflare worker with the new code below.';
-    document.getElementById('err-url').textContent = '';
+    document.getElementById('err-msg').innerHTML='<b>'+e.message+'</b>';
+    document.getElementById('err-url').textContent=url;
   }
 }
+function retryInput(){const v=document.getElementById('retry-input').value.trim();if(v)loadCalendar(v);}
 
-function retryInput() {
-  const v = document.getElementById('retry-input').value.trim();
-  if (v) loadCalendar(v);
-}
-
-// ---------- ICS PARSER ----------
-function parseICS(raw) {
-  const text = raw.replace(/\r\n[ \t]/g,'').replace(/\n[ \t]/g,'');
-  const lines = text.split(/\r?\n/);
-  const events = [];
-  let ev = null;
-  for (const line of lines) {
-    if (line === 'BEGIN:VEVENT') { ev={attendees:[]}; continue; }
-    if (line === 'END:VEVENT')   { if (ev?.start) events.push(ev); ev=null; continue; }
-    if (!ev) continue;
-    const ci = line.indexOf(':');
-    if (ci===-1) continue;
-    const rawKey = line.slice(0,ci);
-    const val    = line.slice(ci+1);
-    const key    = rawKey.split(';')[0].toUpperCase();
-    if      (key==='SUMMARY')     ev.summary  = icsText(val);
-    else if (key==='LOCATION')    ev.location = icsText(val);
-    else if (key==='DESCRIPTION') ev.desc     = icsText(val);
-    else if (key==='DTSTART')    { ev.start=icsDate(val); ev.allDay=!val.includes('T'); }
-    else if (key==='DTEND')       ev.end = icsDate(val);
-    else if (key==='ATTENDEE') {
+// ICS Parser
+function parseICS(raw){
+  const text=raw.replace(/\r\n[ \t]/g,'').replace(/\n[ \t]/g,'');
+  const lines=text.split(/\r?\n/);
+  const events=[];let ev=null;
+  for(const line of lines){
+    if(line==='BEGIN:VEVENT'){ev={attendees:[]};continue;}
+    if(line==='END:VEVENT'){if(ev&&ev.start)events.push(ev);ev=null;continue;}
+    if(!ev)continue;
+    const ci=line.indexOf(':');if(ci===-1)continue;
+    const rawKey=line.slice(0,ci),val=line.slice(ci+1),key=rawKey.split(';')[0].toUpperCase();
+    if(key==='SUMMARY')ev.summary=icsText(val);
+    else if(key==='LOCATION')ev.location=icsText(val);
+    else if(key==='DTSTART'){ev.start=icsDate(val);ev.allDay=!val.includes('T');}
+    else if(key==='DTEND')ev.end=icsDate(val);
+    else if(key==='ATTENDEE'){
+      const cn=rawKey.match(/CN=([^;:]+)/i),em=val.match(/mailto:(.+)/i);
+      const nm=cn?cn[1].replace(/"/g,'').trim():em?em[1].trim():null;
+      if(nm)ev.attendees.push(nm);
+    }else if(key==='ORGANIZER'){
       const cn=rawKey.match(/CN=([^;:]+)/i);
-      const em=val.match(/mailto:(.+)/i);
-      const nm=cn?cn[1].replace(/"/g,'').trim():em?.[1]?.trim();
-      if (nm) ev.attendees.push(nm);
-    } else if (key==='ORGANIZER') {
-      const cn=rawKey.match(/CN=([^;:]+)/i);
-      if (cn) ev.organizer=cn[1].replace(/"/g,'').trim();
+      if(cn)ev.organizer=cn[1].replace(/"/g,'').trim();
     }
   }
   return events.filter(e=>e.start).sort((a,b)=>a.start-b.start);
@@ -283,30 +750,27 @@ function icsDate(val){
   return z==='Z'?new Date(Date.UTC(+y,+mo-1,+d,+h,+mi,+sc)):new Date(+y,+mo-1,+d,+h,+mi,+sc);
 }
 
-// ---------- RENDER ----------
-function renderDashboard(name) {
-  document.getElementById('cal-name-display').textContent = name;
-  document.getElementById('event-count-chip').textContent = allEvents.length + ' events';
-  document.getElementById('updated-at').textContent = 'updated ' + new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+// Render
+function renderDashboard(name){
+  document.getElementById('updated-at').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('event-count-chip').textContent=allEvents.length+' waypoints logged';
   screens('screen-dashboard');
+  initHero();
+  initCrew();
 
-  const now=new Date(), past=allEvents.filter(e=>e.start<now), upcoming=allEvents.filter(e=>e.start>=now);
-
+  const now=new Date(),past=allEvents.filter(e=>e.start<now),upcoming=allEvents.filter(e=>e.start>=now);
   renderNext(upcoming[0]);
 
   const thisMonth=allEvents.filter(e=>e.start.getMonth()===now.getMonth()&&e.start.getFullYear()===now.getFullYear());
-  const timed=past.filter(e=>!e.allDay&&e.end);
-  const avgMin=timed.length?Math.round(timed.reduce((a,e)=>a+(e.end-e.start)/60000,0)/timed.length):0;
-  document.getElementById('s-total').textContent    = allEvents.length;
-  document.getElementById('s-upcoming').textContent = upcoming.length;
-  document.getElementById('s-month').textContent    = thisMonth.length;
-  document.getElementById('s-avg').textContent      = fmtDur(avgMin);
+  document.getElementById('s-total').textContent=allEvents.length;
+  document.getElementById('s-upcoming').textContent=upcoming.length;
+  document.getElementById('s-month').textContent=thisMonth.length;
 
   // Leaderboard
   const counts={};
   for(const e of allEvents){
-    for(const p of [...e.attendees,e.organizer].filter(Boolean)){
-      if(p.length>1&&!p.includes('@')&&!/calendar/i.test(p)) counts[p]=(counts[p]||0)+1;
+    for(const p of[...e.attendees,e.organizer].filter(Boolean)){
+      if(p.length>1&&!p.includes('@')&&!/calendar/i.test(p))counts[p]=(counts[p]||0)+1;
     }
   }
   const lb=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,8);
@@ -316,142 +780,146 @@ function renderDashboard(name) {
     document.getElementById('lb-list').innerHTML=lb.map(([n,c],i)=>`
       <div class="lb-row">
         <span class="lb-medal">${MEDALS[i]||i+1}</span>
+        ${avatarEl(n,22)}
         <span class="lb-name">${n}</span>
-        <div class="lb-bar-wrap"><div class="lb-bar-track"><div class="lb-bar-fill" style="width:${Math.round(c/mx*100)}%;background:${BAR_COLORS[i%BAR_COLORS.length]}"></div></div></div>
+        <div class="lb-track"><div class="lb-fill" style="width:${Math.round(c/mx*100)}%"></div></div>
         <span class="lb-n">${c}</span>
       </div>`).join('');
   }
 
   // Upcoming
-  const upEl=document.getElementById('upcoming-list');
-  upEl.innerHTML=upcoming.length?upcoming.slice(0,10).map(eventItem).join(''):'<div class="no-data">nothing on the horizon yet! 🌅</div>';
-
-  // Month chart
-  const mC={};
-  for(const e of allEvents){const k=e.start.getFullYear()+'-'+e.start.getMonth();mC[k]=(mC[k]||0)+1;}
-  const months=[];
-  for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({y:d.getFullYear(),m:d.getMonth(),cur:i===0});}
-  const mV=months.map(m=>mC[m.y+'-'+m.m]||0);
-  const mMax=Math.max(...mV,1);
-  document.getElementById('month-chart').innerHTML=months.map((m,i)=>{
-    const h=Math.max(3,Math.round(mV[i]/mMax*65));
-    const col=BAR_COLORS[i%BAR_COLORS.length];
-    return `<div class="month-col">
-      <div class="month-bar-outer"><div class="month-bar-el" style="height:${h}px;background:${m.cur?'#FFE135':col};"></div></div>
-      <div class="month-lbl" style="color:${m.cur?'#FFE135':'rgba(255,255,255,.7)'}">${MONTHS[m.m]}</div>
-      <div class="month-n" style="color:${m.cur?'#FFE135':'white'}">${mV[i]}</div>
-    </div>`;
-  }).join('');
-
-  // DOW
-  const dow=new Array(7).fill(0);
-  for(const e of past)dow[e.start.getDay()]++;
-  const dowMax=Math.max(...dow,1);
-  document.getElementById('dow-grid').innerHTML=DAYS.map((d,i)=>{
-    const r=dow[i]/dowMax;
-    const bg=r>0.65?'#FFE135':r>0.3?'rgba(255,255,255,.3)':'rgba(255,255,255,.1)';
-    const col=r>0.65?'#1a1a1a':'white';
-    return `<div class="dow-cell" style="background:${bg};border-color:${r>0.65?'#1a1a1a':'rgba(255,255,255,.4)'}">
-      <div class="dow-day-lbl" style="color:${col}">${d}</div>
-      <div class="dow-n" style="color:${col}">${dow[i]}</div>
-    </div>`;
-  }).join('');
-
-  // Duration
-  const durs={'<30m':0,'30–60m':0,'1–2h':0,'2–4h':0,'4h+':0};
-  for(const e of allEvents.filter(e=>!e.allDay&&e.end)){
-    const m=(e.end-e.start)/60000;
-    if(m<30)durs['<30m']++;else if(m<60)durs['30–60m']++;else if(m<120)durs['1–2h']++;else if(m<240)durs['2–4h']++;else durs['4h+']++;
-  }
-  const durMax=Math.max(...Object.values(durs),1);
-  document.getElementById('dur-list').innerHTML=Object.entries(durs).map(([l,n],i)=>`
-    <div class="dur-row">
-      <span class="dur-lbl" style="color:white">${l}</span>
-      <div class="dur-track"><div class="dur-fill" style="width:${Math.round(n/durMax*100)}%;background:${BAR_COLORS[i%BAR_COLORS.length]}"></div></div>
-      <span class="dur-n" style="color:white">${n}</span>
-    </div>`).join('');
-
-  // Tags
-  const freq={};
-  for(const e of allEvents){
-    for(const w of(e.summary||'').toLowerCase().split(/\W+/)){
-      if(w.length>2&&!STOP.has(w)&&isNaN(w))freq[w]=(freq[w]||0)+1;
-    }
-  }
-  const TAG_BG=[{bg:'#FFE135',text:'#1a1a1a'},{bg:'#FF5DAB',text:'white'},{bg:'#3B82F6',text:'white'},{bg:'#22C55E',text:'white'},{bg:'#FF7A1A',text:'white'},{bg:'#A855F7',text:'white'},{bg:'#06B6D4',text:'white'},{bg:'#EF4444',text:'white'}];
-  const tags=Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,28);
-  const tagMax=tags.length?tags[0][1]:1;
-  document.getElementById('tag-cloud').innerHTML=tags.length
-    ?tags.map(([w,n],i)=>{const r=n/tagMax;const c=TAG_BG[i%TAG_BG.length];return`<span class="tag ${r>0.6?'xl':r>0.3?'lg':''}" style="background:${c.bg};color:${c.text}">${w}</span>`;}).join('')
-    :'<span class="no-data">not enough events yet — add some! 🗓️</span>';
+  document.getElementById('upcoming-list').innerHTML=upcoming.length
+    ?upcoming.slice(0,10).map(eventItem).join('')
+    :'<div class="no-data">NO WAYPOINTS AHEAD — ENJOY THE CAMP</div>';
 
   // Recent
-  document.getElementById('recent-list').innerHTML=past.length?[...past].reverse().slice(0,8).map(eventItem).join(''):'<div class="no-data">no past events yet!</div>';
+  document.getElementById('recent-list').innerHTML=past.length
+    ?[...past].reverse().slice(0,8).map(eventItem).join('')
+    :'<div class="no-data">NO PAST EXPEDITIONS LOGGED</div>';
 }
 
 function renderNext(ev){
   const el=document.getElementById('next-card-inner');
-  if(!ev){el.innerHTML='<div class="no-data">nothing coming up! enjoy the break 🌴</div>';return;}
+  if(!ev){el.innerHTML='<div class="next-title" style="font-size:1rem;opacity:.6">No waypoints ahead</div>';return;}
   const diff=ev.start-new Date();
   const d=Math.floor(diff/86400000),h=Math.floor((diff%86400000)/3600000),mi=Math.floor((diff%3600000)/60000);
-  const cd=d>0?`in ${d}d ${h}h ⏰`:h>0?`in ${h}h ${mi}m ⚡`:`in ${mi}m 🔥`;
+  const cd=d>0?d+'d '+h+'h out':h>0?h+'h '+mi+'m out':mi+'m out';
   const dur=ev.allDay||!ev.end?'all day':fmtDur((ev.end-ev.start)/60000);
   el.innerHTML=`
-    <div class="next-countdown">${cd}</div>
+    <div class="next-countdown">▸ ${cd}</div>
     <div class="next-title">${ev.summary||'Untitled'}</div>
-    ${ev.location?`<div class="next-meta">📍 ${ev.location}</div>`:''}
-    <div class="next-meta">🕐 ${fmtDateTime(ev.start,ev.allDay)}</div>
-    <div class="next-meta">⏱️ ${dur}</div>
-    ${ev.attendees.length?`<div class="next-meta">👥 ${ev.attendees.length} people</div>`:''}`;
+    ${ev.location?`<div class="next-meta"><span class="next-meta-icon">📍</span>${ev.location}</div>`:''}
+    <div class="next-meta"><span class="next-meta-icon">◷</span>${fmtDateTime(ev.start,ev.allDay)}</div>
+    <div class="next-meta"><span class="next-meta-icon">⏱</span>${dur}</div>
+    ${ev.attendees.length?`<div class="next-meta" style="gap:3px;align-items:center"><span class="next-meta-icon">⛺</span><span style="display:inline-flex;gap:3px">${ev.attendees.slice(0,6).map(a=>avatarEl(a,24)).join('')}</span></div>`:''}`;
 }
 
 function eventItem(e){
-  const ci=Math.abs(hash(e.summary||''))%BADGE_COLORS.length;
-  const bc=BADGE_COLORS[ci], pip=BAR_COLORS[ci%BAR_COLORS.length];
   const dur=e.allDay||!e.end?'all day':fmtDur((e.end-e.start)/60000);
   return`<div class="event-item">
-    <div class="ev-badge" style="background:${bc.bg};color:${bc.text}">
-      <div class="ev-day">${e.start.getDate()}</div>
-      <div class="ev-mon">${MONTHS[e.start.getMonth()]}</div>
+    <div class="ev-marker">
+      <div class="ev-date-box">
+        <div class="ev-day">${e.start.getDate()}</div>
+        <div class="ev-mon">${MONTHS[e.start.getMonth()]}</div>
+      </div>
     </div>
     <div class="ev-info">
       <div class="ev-name">${e.summary||'Untitled'}</div>
-      <div class="ev-time">${e.allDay?'all day':fmtTime(e.start)+' · '+dur}${e.location?' · '+e.location.split(',')[0]:''}</div>
+      <div class="ev-time">${e.allDay?'ALL DAY':fmtTime(e.start)+' · '+dur}${e.location?' · '+e.location.split(',')[0]:''}</div>
+      ${e.attendees.length?'<div class="ev-avatars">'+e.attendees.slice(0,5).map(a=>avatarEl(a,18)).join('')+'</div>':''}
     </div>
-    <div class="ev-pip" style="background:${pip}"></div>
+    <div class="ev-pip"></div>
   </div>`;
 }
 
 function fmtDur(m){if(!m||m<1)return'—';return m>=60?(Math.round(m/6)/10)+'h':Math.round(m)+'m';}
 function fmtTime(d){let h=d.getHours(),m=d.getMinutes(),ap=h>=12?'pm':'am';h=h%12||12;return h+':'+(m+'').padStart(2,'0')+' '+ap;}
-function fmtDateTime(d,allDay){if(allDay)return`${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`;return`${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]} · ${fmtTime(d)}`;}
+function fmtDateTime(d,allDay){if(allDay)return DAYS[d.getDay()]+' '+d.getDate()+' '+MONTHS[d.getMonth()];return DAYS[d.getDay()]+' '+d.getDate()+' '+MONTHS[d.getMonth()]+' · '+fmtTime(d);}
 function hash(s){let h=0;for(let i=0;i<s.length;i++)h=(Math.imul(31,h)+s.charCodeAt(i))|0;return h;}
 
-// ---------- DEMO ----------
+// Demo
 function loadDemo(){
   screens('screen-loading');
   setTimeout(()=>{
     const now=new Date();
-    const names=['Design Sync','Weekly Standup','1:1 with Sarah','Sprint Planning','User Research','Retrospective','Product Demo','Board Review','Team Lunch','Architecture Discussion','Roadmap Planning','Customer Call','Hiring Panel','OKR Review','Hackathon','Marketing Sync','Quarterly Planning','Performance Review','Budget Meeting','Strategy Session'];
-    const people=['Niamh','Sarah Chen','Marcus Liu','Priya Patel','Tom Burke','Yuki Tanaka','Alex Rodriguez','Emma Walsh'];
-    const locs=['Zoom','Room A','Conference Room B','Google Meet','',''];
+    const names=['Sunset Ridge Hike','Trail Planning Session','Forest Swim','Campfire Night','Cabin Weekend','City Wander','Coffee & Maps','Bike the Coast','Night Market','Summit Attempt','River Walk','Foraging Walk'];
+    const people=['Niamh','Dan','Rawan','Youri','Clara'];
+    const locs=['Södermalm','The usual spot','TBD','Google Meet','','Gamla Stan'];
     allEvents=[];
     for(let i=-120;i<=45;i++){
-      if(Math.random()<0.45){
+      if(Math.random()<0.38){
         const d=new Date(now);d.setDate(d.getDate()+i);
         if(d.getDay()===0||d.getDay()===6)continue;
         d.setHours(8+Math.floor(Math.random()*9),[0,30][Math.floor(Math.random()*2)],0,0);
-        const durMin=[30,30,60,60,60,90,120][Math.floor(Math.random()*7)];
+        const durMin=[30,60,60,90,120,120][Math.floor(Math.random()*6)];
         const sh=[...people].sort(()=>Math.random()-.5);
         allEvents.push({summary:names[Math.floor(Math.random()*names.length)],start:new Date(d),end:new Date(d.getTime()+durMin*60000),location:locs[Math.floor(Math.random()*locs.length)],attendees:sh.slice(0,Math.floor(Math.random()*4)),organizer:people[Math.floor(Math.random()*people.length)],allDay:false});
       }
     }
     allEvents.sort((a,b)=>a.start-b.start);
-    renderDashboard("Niamh's Calendar ✨");
-  },500);
+    renderDashboard("Niamh's Trail Log");
+  },600);
 }
 
 window.addEventListener('DOMContentLoaded',()=>loadCalendar());
+
+// ── CLICK STICKERS ──────────────────────────────────────────
+const STICKERS = ['⭐','🌲','🧭','🍂','🌿','🔥','🌄','⛺','🦌','🪵','🌾','🍄','🦅','🌻','💛','🪨','🐾','✦','🌙','🍁','🌊','🦔','🫐','🪺','🌺','🏔️','🦋','🌈'];
+let stickerLayer = null;
+
+function initStickers() {
+  stickerLayer = document.createElement('div');
+  stickerLayer.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9999;';
+  document.body.appendChild(stickerLayer);
+
+  // Inject sticker text-shadow CSS for white outline effect
+  const style = document.createElement('style');
+  style.textContent = '.sticker-el { text-shadow: -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff, 0 -3px 0 #fff, 0 3px 0 #fff, -3px 0 0 #fff, 3px 0 0 #fff; filter: drop-shadow(0 2px 4px rgba(0,0,0,.25)); cursor:default; }';
+  document.head.appendChild(style);
+
+  // Place sticker on ANY click — no exclusions
+  document.addEventListener('click', e => {
+    // Only skip actual interactive controls
+    if (e.target.closest('button,a,input,select,textarea')) return;
+    spawnSticker(e.clientX, e.clientY);
+  });
+}
+
+function spawnSticker(x, y) {
+  const emoji = STICKERS[Math.floor(Math.random() * STICKERS.length)];
+  const el = document.createElement('div');
+  const size = 28 + Math.floor(Math.random() * 22);
+  const rot = (Math.random() - 0.5) * 50;
+  el.className = 'sticker-el';
+  el.textContent = emoji;
+  el.style.cssText = [
+    'position:fixed',
+    'left:' + (x - size/2) + 'px',
+    'top:' + (y - size/2) + 'px',
+    'font-size:' + size + 'px',
+    'transform:rotate(' + rot + 'deg) scale(0)',
+    'transition:transform .3s cubic-bezier(.34,1.7,.64,1)',
+    'user-select:none',
+    'line-height:1',
+    'z-index:9999',
+    'pointer-events:none',
+  ].join(';');
+  stickerLayer.appendChild(el);
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      el.style.transform = 'rotate(' + rot + 'deg) scale(1)';
+    });
+  });
+  // Fade out after 8s
+  setTimeout(() => {
+    el.style.transition = 'opacity 1.2s ease, transform 1.2s ease';
+    el.style.opacity = '0';
+    el.style.transform = 'rotate(' + (rot + 12) + 'deg) scale(.7)';
+    setTimeout(() => el.remove(), 1200);
+  }, 8000);
+}
+
+window.addEventListener('DOMContentLoaded', initStickers);
 </script>
 </body>
 </html>
