@@ -1275,22 +1275,26 @@ function initNiamhStats() {
   const grid = document.getElementById('niamh-stats-grid');
   if (!grid) return;
 
-  const BIRTHDAY = new Date(1998, 3, 8);
+  const BIRTHDAY = new Date(Date.UTC(1998, 3, 8, 14, 24, 0)); // 9:24am Colombian time (UTC-5)
 
   function calcStats() {
     const now = new Date();
     const elapsed = now - BIRTHDAY;
-    const daysAlive    = elapsed / 86400000;
+    const secsAlive    = elapsed / 1000;
     const minsAlive    = elapsed / 60000;
     const hoursAlive   = elapsed / 3600000;
+    const daysAlive    = elapsed / 86400000;
     const weeksAlive   = daysAlive / 7;
+    const monthsAlive  = daysAlive / 30.44;
     const heartbeats   = minsAlive * 70;
+    const breaths      = minsAlive * 16; // ~16 breaths/min
     const sleepDays    = daysAlive * 8 / 24;
-    const age          = now.getFullYear() - 1998 - (now < new Date(now.getFullYear(),3,8) ? 1 : 0);
-    const nextBday     = new Date(now.getFullYear(), 3, 8);
-    if (nextBday < now) nextBday.setFullYear(nextBday.getFullYear() + 1);
+    const age          = now.getUTCFullYear() - 1998 - (now < new Date(Date.UTC(now.getUTCFullYear(),3,8,14,24)) ? 1 : 0);
+    const nextBday     = new Date(Date.UTC(now.getUTCFullYear(), 3, 8, 14, 24, 0));
+    if (nextBday < now) nextBday.setUTCFullYear(nextBday.getUTCFullYear() + 1);
     const daysToNext   = Math.ceil((nextBday - now) / 86400000);
-    const moonPhaseNum = ((now - new Date(2000,0,6)) / 86400000) % 29.53;
+    const minsToNext   = Math.floor((nextBday - now) / 60000);
+    const moonPhaseNum = ((now - new Date(Date.UTC(2000,0,6))) / 86400000) % 29.53;
     const moonPhase    =
       moonPhaseNum < 2  ? 'New Moon 🌑' :
       moonPhaseNum < 8  ? 'Waxing Crescent 🌒' :
@@ -1300,19 +1304,27 @@ function initNiamhStats() {
       moonPhaseNum < 22 ? 'Waning Gibbous 🌖' :
       moonPhaseNum < 24 ? 'Last Quarter 🌗' : 'Waning Crescent 🌘';
 
+    // Colombians who share her birthday
+    // Distance Bogotá → Stockholm in km
+    const bogToStockholm = 9244;
+
     return [
-      { id:'ns-age',   live:false, val:() => age + ' years',                               lbl:'age' },
-      { id:'ns-days',  live:false, val:() => Math.floor(daysAlive).toLocaleString(),        lbl:'days alive' },
-      { id:'ns-hours', live:false, val:() => Math.floor(hoursAlive).toLocaleString(),       lbl:'hours alive' },
-      { id:'ns-mins',  live:true,  val:() => Math.floor(minsAlive).toLocaleString(),        lbl:'minutes alive' },
-      { id:'ns-weeks', live:false, val:() => Math.floor(weeksAlive).toLocaleString(),       lbl:'weeks on this earth' },
-      { id:'ns-heart', live:true,  val:() => Math.floor(heartbeats).toLocaleString(),       lbl:'estimated heartbeats' },
-      { id:'ns-sleep', live:false, val:() => Math.floor(sleepDays).toLocaleString() + ' days', lbl:'spent sleeping (est.)' },
-      { id:'ns-bday',  live:false, val:() => daysToNext === 0 ? 'TODAY!! 🎉' : daysToNext + ' days', lbl:'until next birthday' },
-      { id:'ns-moon',  live:false, val:() => moonPhase,                                    lbl:'moon phase today' },
-      { id:'ns-hist',  live:false, val:() => 'April 8',                                    lbl:'birthday' },
-      { id:'ns-year',  live:false, val:() => '1998',                                       lbl:'year of birth' },
-      { id:'ns-orig',  live:false, val:() => '🍀 Ireland',                                 lbl:'born in' },
+      { id:'ns-age',    live:false, val:() => age + ' years',                                    lbl:'age' },
+      { id:'ns-days',   live:false, val:() => Math.floor(daysAlive).toLocaleString(),             lbl:'days alive' },
+      { id:'ns-hours',  live:true,  val:() => Math.floor(hoursAlive).toLocaleString(),            lbl:'hours alive' },
+      { id:'ns-mins',   live:true,  val:() => Math.floor(minsAlive).toLocaleString(),             lbl:'minutes alive' },
+      { id:'ns-secs',   live:true,  val:() => Math.floor(secsAlive).toLocaleString(),             lbl:'seconds alive' },
+      { id:'ns-weeks',  live:false, val:() => Math.floor(weeksAlive).toLocaleString(),            lbl:'weeks on this earth' },
+      { id:'ns-months', live:false, val:() => Math.floor(monthsAlive).toLocaleString(),           lbl:'months alive' },
+      { id:'ns-heart',  live:true,  val:() => Math.floor(heartbeats).toLocaleString(),            lbl:'estimated heartbeats' },
+      { id:'ns-breath', live:true,  val:() => Math.floor(breaths).toLocaleString(),               lbl:'breaths taken' },
+      { id:'ns-sleep',  live:false, val:() => Math.floor(sleepDays).toLocaleString() + ' days',   lbl:'spent sleeping (est.)' },
+      { id:'ns-bday',   live:true,  val:() => daysToNext === 0 ? 'NOW!! 🎉' : minsToNext.toLocaleString() + ' mins', lbl:'until next birthday' },
+      { id:'ns-moon',   live:false, val:() => moonPhase,                                         lbl:'moon phase today' },
+      { id:'ns-dist',   live:false, val:() => bogToStockholm.toLocaleString() + ' km',            lbl:'bogotá → stockholm' },
+      { id:'ns-born',   live:false, val:() => '🇨🇴 Colombia',                                    lbl:'born in' },
+      { id:'ns-time',   live:false, val:() => '9:24am',                                          lbl:'birth time (colombian)' },
+      { id:'ns-year',   live:false, val:() => '1998',                                            lbl:'year of birth' },
     ];
   }
 
