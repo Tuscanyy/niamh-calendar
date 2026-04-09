@@ -270,6 +270,35 @@ body {
 
 /* No data */
 .no-data { font-family:var(--type); font-size:.8rem; color:var(--faded); letter-spacing:.06em; padding:.5rem 0; opacity:.7; }
+/* Collapsible sections */
+.section-toggle {
+  display:flex; align-items:center; justify-content:space-between;
+  cursor:pointer; user-select:none; width:100%;
+}
+.section-toggle:hover .toggle-arrow { color:var(--orange); }
+.toggle-arrow {
+  font-family:var(--type); font-size:.75rem; letter-spacing:.1em;
+  color:var(--faded); transition:transform .3s ease, color .2s;
+  flex-shrink:0; margin-left:12px;
+}
+.toggle-arrow.open { transform:rotate(180deg); }
+.section-body {
+  overflow:hidden; transition:max-height .4s ease, opacity .3s ease;
+  max-height:4000px; opacity:1;
+}
+.section-body.collapsed { max-height:0; opacity:0; }
+/* Add idea input */
+.add-idea-row {
+  display:flex; gap:8px; margin-top:1.25rem; align-items:center; flex-wrap:wrap;
+}
+.add-idea-row input {
+  flex:1; min-width:180px; background:rgba(255,255,255,.9);
+  border:2px solid var(--ink); padding:8px 12px;
+  font-family:var(--hand); font-size:1rem; color:var(--ink);
+  box-shadow:2px 2px 0 rgba(0,0,0,.15);
+}
+.add-idea-row input:focus { outline:none; border-color:var(--orange); }
+.add-idea-row input::placeholder { color:rgba(26,26,26,.4); }
 /* Niamh Stats */
 .niamh-stats-section { padding:2rem 1.5rem 1.5rem; background:var(--paper2); border-bottom:1px solid rgba(44,26,8,.1); }
 .niamh-stats-inner { max-width:1200px; margin:0 auto; }
@@ -598,6 +627,9 @@ body {
   </div>
 
   <!-- Hero -->
+  <div style="position:relative">
+  <button onclick="toggleSection('hero')" style="position:absolute;top:12px;right:12px;z-index:50;background:rgba(0,0,0,.4);color:white;border:1px solid rgba(255,255,255,.4);font-family:var(--type);font-size:.65rem;letter-spacing:.1em;padding:4px 10px;cursor:pointer;" id="hero-toggle-btn">▲ HIDE</button>
+  <div class="section-body" id="body-hero">
   <div class="hero" id="hero">
     <div class="hero-overlay"></div>
     <div class="hero-content">
@@ -618,17 +650,36 @@ body {
 
   <!-- Crew -->
   <div class="crew-section">
-    <div class="section-eyebrow">✦ EXPEDITION MEMBERS ✦</div>
-    <div class="section-title">The Crew</div>
-    <div class="crew-grid" id="crew-grid"></div>
+    <div class="section-toggle" onclick="toggleSection('crew')">
+      <div>
+        <div class="section-eyebrow">✦ EXPEDITION MEMBERS ✦</div>
+        <div class="section-title">The Crew</div>
+      </div>
+      <span class="toggle-arrow open" id="arrow-crew">▲</span>
+    </div>
+    <div class="section-body" id="body-crew">
+      <div class="crew-grid" id="crew-grid"></div>
+    </div>
   </div>
 
   <!-- NIAMH STATS -->
   <div class="niamh-stats-section">
     <div class="niamh-stats-inner">
-      <div class="section-eyebrow" style="color:var(--faded)">✦ THE NIAMH FILES ✦</div>
-      <div class="section-title">By the numbers</div>
-      <div class="niamh-stats-grid" id="niamh-stats-grid"></div>
+      <div class="section-toggle" onclick="toggleSection('stats')">
+        <div>
+          <div class="section-eyebrow" style="color:var(--faded)">✦ THE NIAMH FILES ✦</div>
+          <div class="section-title">By the numbers</div>
+        </div>
+        <span class="toggle-arrow open" id="arrow-stats">▲</span>
+      </div>
+      <div class="section-body" id="body-stats">
+        <div class="niamh-stats-grid" id="niamh-stats-grid"></div>
+      </div>
+      <div class="add-idea-row">
+        <input type="text" id="new-idea-input" placeholder="💡 add your own idea…" onkeydown="if(event.key==='Enter')addIdea()">
+        <button class="trail-btn" onclick="addIdea()" style="background:var(--paper);font-size:.85rem;padding:7px 14px">+ Add</button>
+      </div>
+      </div><!-- end section-body -->
     </div>
   </div>
 
@@ -638,8 +689,12 @@ body {
   <!-- IDEAS SECTION -->
   <div class="ideas-section">
     <div class="ideas-section-inner">
-      <div class="ideas-eyebrow">✦ EXPEDITION IDEAS ✦</div>
-      <div class="ideas-row">
+      <div class="section-toggle" onclick="toggleSection('ideas')" style="margin-bottom:.75rem">
+        <div class="ideas-eyebrow" style="margin-bottom:0">✦ EXPEDITION IDEAS ✦</div>
+        <span class="toggle-arrow open" id="arrow-ideas" style="color:rgba(255,255,255,.6)">▲</span>
+      </div>
+      <div class="section-body" id="body-ideas">
+      <div class="ideas-row" id="ideas-row">
         <div class="idea-card">
           <div class="idea-icon">🪢</div>
           <div class="idea-label">Shibari</div>
@@ -685,6 +740,16 @@ body {
     </div>
   </div>
 
+  <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem">
+    <div class="section-toggle" onclick="toggleSection('calendar')" style="padding:.875rem 0;border-bottom:1px solid rgba(44,26,8,.1)">
+      <div>
+        <div class="section-eyebrow" style="color:var(--faded)">✦ THE CALENDAR ✦</div>
+        <div class="section-title" style="margin-bottom:0">Events & waypoints</div>
+      </div>
+      <span class="toggle-arrow open" id="arrow-calendar">▲</span>
+    </div>
+  </div>
+  <div class="section-body" id="body-calendar">
   <div class="page">
     <div class="sidebar">
 
@@ -724,11 +789,19 @@ body {
     </div>
   </div>
 
+  </div><!-- end body-calendar -->
+
   <!-- TRAIL GAME -->
   <div class="game-section">
     <div class="game-inner">
-      <div class="section-eyebrow" style="color:var(--faded)">✦ EXPEDITION GAME ✦</div>
-      <div class="section-title">The Trail Challenge</div>
+      <div class="section-toggle" onclick="toggleSection('game')">
+        <div>
+          <div class="section-eyebrow" style="color:var(--faded)">✦ EXPEDITION GAME ✦</div>
+          <div class="section-title">The Trail Challenge</div>
+        </div>
+        <span class="toggle-arrow open" id="arrow-game">▲</span>
+      </div>
+      <div class="section-body" id="body-game">
 
       <!-- Player select screen -->
       <div id="game-setup">
@@ -1847,6 +1920,69 @@ function spawnSticker(x, y) {
   }, 8000);
 }
 
+// ── COLLAPSIBLE SECTIONS ──────────────────────────────────────────────────────
+const sectionState = {};
+
+function toggleSection(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  if (!body) return;
+  const isOpen = !body.classList.contains('collapsed');
+  body.classList.toggle('collapsed', isOpen);
+  if (arrow) { arrow.classList.toggle('open', !isOpen); }
+  // Special hero button text
+  if (id === 'hero') {
+    const btn = document.getElementById('hero-toggle-btn');
+    if (btn) btn.textContent = isOpen ? '▼ SHOW' : '▲ HIDE';
+  }
+}
+
+// ── ADD IDEA (persisted via Cloudflare KV) ────────────────────────────────────
+const IDEA_COLORS = ['#FFE135','#FF9EBC','#B5EAD7','#AED6F1','#FFDAC1','#E2F0CB'];
+const IDEAS_URL = CALENDAR_URL.replace(/\/$/, '') + '/ideas';
+
+async function loadIdeas() {
+  try {
+    const res = await fetch(IDEAS_URL);
+    if (!res.ok) return;
+    const ideas = await res.json();
+    ideas.forEach((idea, i) => renderIdeaCard(idea.text, i + 4));
+  } catch(e) { console.log('Could not load ideas:', e.message); }
+}
+
+async function addIdea() {
+  const input = document.getElementById('new-idea-input');
+  const text = (input.value || '').trim();
+  if (!text) return;
+  input.value = '';
+
+  // Optimistically render immediately
+  const row = document.getElementById('ideas-row');
+  const tempCount = row ? row.querySelectorAll('.idea-card').length : 4;
+  renderIdeaCard(text, tempCount);
+
+  // Persist to KV
+  try {
+    await fetch(IDEAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
+  } catch(e) { console.log('Could not save idea:', e.message); }
+}
+
+function renderIdeaCard(text, colorIdx) {
+  const row = document.getElementById('ideas-row');
+  if (!row) return;
+  const card = document.createElement('div');
+  card.className = 'idea-card';
+  card.style.background = IDEA_COLORS[colorIdx % IDEA_COLORS.length];
+  card.style.transform = 'rotate(' + ((Math.random()-0.5)*5).toFixed(1) + 'deg)';
+  card.style.boxShadow = '3px 3px 0 rgba(0,0,0,.12), 5px 5px 12px rgba(0,0,0,.2), inset 0 -4px 0 rgba(0,0,0,.08)';
+  card.innerHTML = '<div class="idea-icon">💡</div><div class="idea-label">' + text + '</div>';
+  row.appendChild(card);
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   screens('screen-dashboard');
   initHero();
@@ -1854,6 +1990,7 @@ window.addEventListener('DOMContentLoaded', () => {
   initGame();
   initNiamhStats();
   loadCalendar();
+  loadIdeas();
 });
 
 window.addEventListener('DOMContentLoaded', initStickers);
