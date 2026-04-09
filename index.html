@@ -102,6 +102,35 @@ body {
 .topbar-right { display:flex; align-items:center; gap:12px; }
 .coord-pill { font-family:var(--type); font-size:10px; color:var(--faded); letter-spacing:.08em; }
 .ranger-btn { font-family:var(--type); font-size:.8rem; background:transparent; color:var(--orange); border:1px solid var(--orange); padding:5px 14px; cursor:pointer; letter-spacing:.06em; transition:background .2s, color .2s; }
+/* Who am I picker */
+.who-am-i { position:relative; display:flex; align-items:center; gap:6px; }
+.wai-label { font-family:var(--type); font-size:.6rem; letter-spacing:.1em; color:rgba(255,255,255,.5); }
+.wai-picker { display:flex; align-items:center; gap:6px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.3); padding:4px 10px; cursor:pointer; font-family:var(--type); font-size:.75rem; color:white; letter-spacing:.04em; transition:background .2s; }
+.wai-picker:hover { background:rgba(255,255,255,.2); }
+.wai-av { width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:white; flex-shrink:0; overflow:hidden; }
+.wai-av img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+.wai-menu { position:absolute; top:calc(100% + 6px); right:0; background:var(--paper); border:2px solid var(--ink); box-shadow:4px 4px 0 var(--ink); z-index:200; min-width:160px; }
+.wai-option { display:flex; align-items:center; gap:8px; padding:8px 12px; cursor:pointer; font-family:var(--type); font-size:.8rem; color:var(--ink); letter-spacing:.04em; transition:background .15s; }
+.wai-option:hover { background:var(--paper2); }
+.wai-option .wo-av { width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:white; flex-shrink:0; overflow:hidden; }
+.wai-option .wo-av img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+/* Event item extras */
+.ev-actions { display:flex; gap:6px; align-items:center; flex-shrink:0; }
+.ev-join-btn { font-family:var(--type); font-size:.55rem; letter-spacing:.06em; border:1px solid var(--orange); color:var(--orange); background:transparent; padding:2px 7px; cursor:pointer; transition:background .15s, color .15s; white-space:nowrap; }
+.ev-join-btn:hover { background:var(--orange); color:var(--paper); }
+.ev-join-btn.joined { background:var(--orange); color:var(--paper); }
+.ev-del-btn { font-family:var(--type); font-size:.55rem; letter-spacing:.04em; border:1px solid rgba(139,107,69,.4); color:var(--faded); background:transparent; padding:2px 6px; cursor:pointer; transition:background .15s, color .15s; }
+.ev-del-btn:hover { border-color:var(--red,#c0392b); color:var(--red,#c0392b); }
+/* Confirm dialog */
+.confirm-overlay { position:fixed; inset:0; background:rgba(42,26,8,.65); z-index:500; display:flex; align-items:center; justify-content:center; }
+.confirm-card { background:var(--paper); border:3px solid var(--ink); box-shadow:6px 6px 0 var(--ink); padding:1.75rem; max-width:360px; width:90%; text-align:center; animation:pop-in .25s cubic-bezier(.34,1.4,.64,1); }
+.confirm-title { font-family:var(--display); font-size:1.3rem; font-style:italic; margin-bottom:.5rem; color:var(--ink); }
+.confirm-sub { font-family:var(--hand); font-size:1rem; color:var(--faded); margin-bottom:1.25rem; }
+.confirm-btns { display:flex; gap:.75rem; justify-content:center; }
+.confirm-btn { font-family:var(--type); font-size:.8rem; letter-spacing:.06em; padding:.6rem 1.25rem; border:2px solid var(--ink); box-shadow:2px 2px 0 var(--ink); cursor:pointer; transition:transform .1s,box-shadow .1s; }
+.confirm-btn:hover { transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--ink); }
+.confirm-btn.danger { background:#c0392b; color:white; }
+.confirm-btn.cancel { background:var(--paper2); color:var(--ink); }
 .ranger-btn:hover { background:var(--orange); color:var(--paper); }
 
 /* ═══ HERO ═══ */
@@ -622,6 +651,15 @@ body {
     </div>
     <div class="topbar-right">
       <div class="coord-pill" id="event-count-chip"></div>
+      <div class="who-am-i" id="who-am-i-wrap">
+        <div class="wai-label">you are:</div>
+        <div class="wai-picker" id="wai-picker" onclick="toggleWaiMenu()">
+          <div class="wai-av" id="wai-av">?</div>
+          <span id="wai-name">select</span>
+          <span style="font-size:.6rem;opacity:.6">▼</span>
+        </div>
+        <div class="wai-menu" id="wai-menu" style="display:none"></div>
+      </div>
       <button class="ranger-btn" onclick="loadCalendar()">↺ SYNC</button>
     </div>
   </div>
@@ -1158,7 +1196,8 @@ function renderDashboard(name){
 }
 
 function renderCalendarSections(){
-  const now=new Date(),past=allEvents.filter(e=>e.start<now),upcoming=allEvents.filter(e=>e.start>=now);
+  const visible=allEvents.filter(e=>!removedEvents.has(eventKey(e)));
+  const now=new Date(),past=visible.filter(e=>e.start<now),upcoming=visible.filter(e=>e.start>=now);
   renderNext(upcoming[0]);
 
   const thisMonth=allEvents.filter(e=>e.start.getMonth()===now.getMonth()&&e.start.getFullYear()===now.getFullYear());
@@ -1216,6 +1255,21 @@ function renderNext(ev){
 
 function eventItem(e){
   const dur=e.allDay||!e.end?'all day':fmtDur((e.end-e.start)/60000);
+  const key = eventKey(e);
+  const joined = joinedEvents.has(key);
+  const joinBtn = currentUser
+    ? `<button class="ev-join-btn ${joined?'joined':''}" onclick="toggleJoin('${key.replace(/'/g,"\\'")}')">
+        ${joined ? '✓ going' : '+ join'}
+       </button>`
+    : '';
+  const delBtn = `<button class="ev-del-btn" onclick="confirmDelete('${key.replace(/'/g,"\\'")}','${(e.summary||'').replace(/'/g,"\\'")}')">✕</button>`;
+
+  // Build attendee list including locally joined user
+  let attendees = [...e.attendees];
+  if (joined && currentUser && !attendees.find(a => a.toLowerCase().includes(currentUser.name.toLowerCase()))) {
+    attendees = [currentUser.name, ...attendees];
+  }
+
   return`<div class="event-item">
     <div class="ev-marker">
       <div class="ev-date-box">
@@ -1226,9 +1280,12 @@ function eventItem(e){
     <div class="ev-info">
       <div class="ev-name">${e.summary||'Untitled'}</div>
       <div class="ev-time">${e.allDay?'ALL DAY':fmtTime(e.start)+' · '+dur}${e.location?' · '+e.location.split(',')[0]:''}</div>
-      ${e.attendees.length?'<div class="ev-avatars">'+e.attendees.slice(0,5).map(a=>avatarEl(a,18)).join('')+'</div>':''}
+      ${attendees.length?'<div class="ev-avatars">'+attendees.slice(0,6).map(a=>avatarEl(a,18)).join('')+'</div>':''}
     </div>
-    <div class="ev-pip"></div>
+    <div class="ev-actions">
+      ${joinBtn}
+      ${delBtn}
+    </div>
   </div>`;
 }
 
@@ -1920,6 +1977,119 @@ function spawnSticker(x, y) {
   }, 8000);
 }
 
+// ── WHO AM I ──────────────────────────────────────────────────────────────────
+let currentUser = null; // { name, photo, color }
+// Local storage of joined events: set of summaries (lightweight, no backend needed)
+let joinedEvents = new Set(JSON.parse(localStorage.getItem('niamh-joined') || '[]'));
+// Locally removed events (by UID or summary+date)
+let removedEvents = new Set(JSON.parse(localStorage.getItem('niamh-removed') || '[]'));
+
+function eventKey(e) {
+  return (e.summary || 'untitled') + '_' + (e.start ? e.start.toISOString().slice(0,10) : '');
+}
+
+function initWhoAmI() {
+  const menu = document.getElementById('wai-menu');
+  if (!menu) return;
+  menu.innerHTML = '';
+  // "None" option
+  const none = document.createElement('div');
+  none.className = 'wai-option';
+  none.innerHTML = '<div class="wo-av" style="background:#8B6B45">?</div><span>just browsing</span>';
+  none.onclick = () => selectUser(null);
+  menu.appendChild(none);
+
+  PRESET_PLAYERS.forEach(p => {
+    const opt = document.createElement('div');
+    opt.className = 'wai-option';
+    const avDiv = document.createElement('div');
+    avDiv.className = 'wo-av';
+    avDiv.style.background = p.color;
+    avDiv.textContent = p.name[0];
+    if (p.photo) tryImage('avatars', p.photo, url => {
+      if (url) { const img=document.createElement('img'); img.src=url; avDiv.innerHTML=''; avDiv.appendChild(img); }
+    });
+    opt.appendChild(avDiv);
+    const nm = document.createElement('span'); nm.textContent = p.name;
+    opt.appendChild(nm);
+    opt.onclick = () => selectUser(p);
+    menu.appendChild(opt);
+  });
+
+  // Restore saved user
+  const saved = localStorage.getItem('niamh-user');
+  if (saved) {
+    const p = PRESET_PLAYERS.find(x => x.name === saved);
+    if (p) selectUser(p);
+  }
+}
+
+function selectUser(p) {
+  currentUser = p;
+  document.getElementById('wai-menu').style.display = 'none';
+  const nameEl = document.getElementById('wai-name');
+  const avEl = document.getElementById('wai-av');
+  if (!p) {
+    nameEl.textContent = 'select';
+    avEl.style.background = 'rgba(255,255,255,.2)';
+    avEl.innerHTML = '?';
+    localStorage.removeItem('niamh-user');
+  } else {
+    nameEl.textContent = p.name;
+    avEl.style.background = p.color;
+    avEl.innerHTML = p.name[0];
+    if (p.photo) tryImage('avatars', p.photo, url => {
+      if (url) { const img=document.createElement('img'); img.src=url; avEl.innerHTML=''; avEl.appendChild(img); }
+    });
+    localStorage.setItem('niamh-user', p.name);
+  }
+  // Re-render event lists to show updated join state
+  if (allEvents.length) renderCalendarSections();
+}
+
+function toggleWaiMenu() {
+  const menu = document.getElementById('wai-menu');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+// Close menu on outside click
+document.addEventListener('click', e => {
+  if (!e.target.closest('#who-am-i-wrap')) {
+    const m = document.getElementById('wai-menu');
+    if (m) m.style.display = 'none';
+  }
+});
+
+function toggleJoin(key) {
+  if (joinedEvents.has(key)) joinedEvents.delete(key);
+  else joinedEvents.add(key);
+  localStorage.setItem('niamh-joined', JSON.stringify([...joinedEvents]));
+  renderCalendarSections();
+}
+
+function confirmDelete(key, title) {
+  // Show confirm overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'confirm-overlay';
+  overlay.id = 'confirm-overlay';
+  overlay.innerHTML = `
+    <div class="confirm-card">
+      <div class="confirm-title">Remove this event?</div>
+      <div class="confirm-sub">"${title}"</div>
+      <div class="confirm-btns">
+        <button class="confirm-btn danger" onclick="doDelete('${CSS.escape(key)}')">Yes, remove it</button>
+        <button class="confirm-btn cancel" onclick="document.getElementById('confirm-overlay').remove()">Cancel</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function doDelete(key) {
+  document.getElementById('confirm-overlay')?.remove();
+  removedEvents.add(key);
+  localStorage.setItem('niamh-removed', JSON.stringify([...removedEvents]));
+  renderCalendarSections();
+}
+
 // ── COLLAPSIBLE SECTIONS ──────────────────────────────────────────────────────
 const sectionState = {};
 
@@ -1989,6 +2159,7 @@ window.addEventListener('DOMContentLoaded', () => {
   initCrew();
   initGame();
   initNiamhStats();
+  initWhoAmI();
   loadCalendar();
   loadIdeas();
 });
