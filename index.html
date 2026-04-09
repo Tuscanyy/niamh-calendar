@@ -305,6 +305,8 @@ body {
 /* No data */
 .no-data { font-family:var(--type); font-size:.8rem; color:var(--faded); letter-spacing:.06em; padding:.5rem 0; opacity:.7; }
 /* Collapsible sections */
+.section-toggle-bar { display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none; width:100%; padding:.875rem 0; }
+.section-toggle-bar:hover .toggle-arrow { color:var(--orange); }
 .section-toggle {
   display:flex; align-items:center; justify-content:space-between;
   cursor:pointer; user-select:none; width:100%;
@@ -657,7 +659,7 @@ body {
 <!-- DASHBOARD -->
 <div id="screen-dashboard">
 
-  <!-- Topbar -->
+  <!-- ═══ TOPBAR ═══ -->
   <div class="topbar">
     <div class="topbar-brand">
       <span class="topbar-compass">🧭</span>
@@ -682,34 +684,38 @@ body {
     </div>
   </div>
 
-  <!-- Hero -->
-  <div style="position:relative">
-  <button onclick="toggleSection('hero')" style="position:absolute;top:12px;right:12px;z-index:50;background:rgba(0,0,0,.4);color:white;border:1px solid rgba(255,255,255,.4);font-family:var(--type);font-size:.65rem;letter-spacing:.1em;padding:4px 10px;cursor:pointer;" id="hero-toggle-btn">▲ HIDE</button>
-  <div class="section-body" id="body-hero">
-  <div class="hero" id="hero">
-    <div class="hero-overlay"></div>
-    <div class="hero-content">
-      <div class="hero-text-wrap">
-        <div class="hero-eyebrow">✦ EXPEDITION PHOTO LOG ✦</div>
-        <div class="hero-title">The Niamh Files</div>
-        <div class="hero-sub">a love letter in calendar form</div>
-      </div>
-      <div class="hero-nav-wrap">
-        
-        <div class="hero-arrows">
-          <div class="hero-arrow" onclick="heroNav(-1)">◀</div>
-          <div class="hero-arrow" onclick="heroNav(1)">▶</div>
+  <!-- ═══ SECTION: PHOTOS ═══ -->
+  <div class="section-block">
+    <div class="section-toggle-bar" onclick="toggleSection('hero')">
+      <span class="section-toggle-label">✦ PHOTO LOG ✦</span>
+      <span class="toggle-arrow open" id="arrow-hero">▲</span>
+    </div>
+    <div class="section-body" id="body-hero">
+      <div class="hero" id="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="hero-text-wrap">
+            <div class="hero-eyebrow">✦ EXPEDITION PHOTO LOG ✦</div>
+            <div class="hero-title">The Niamh Files</div>
+            <div class="hero-sub">a love letter in calendar form</div>
+          </div>
+          <div class="hero-nav-wrap">
+            <div class="hero-arrows">
+              <div class="hero-arrow" onclick="heroNav(-1)">◀</div>
+              <div class="hero-arrow" onclick="heroNav(1)">▶</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Crew -->
-  <div class="crew-section">
-    <div class="section-toggle" onclick="toggleSection('crew')">
+  <!-- ═══ SECTION: THE CREW ═══ -->
+  <div class="section-block crew-section">
+    <div class="section-toggle-bar" onclick="toggleSection('crew')">
       <div>
         <div class="section-eyebrow">✦ EXPEDITION MEMBERS ✦</div>
-        <div class="section-title">The Crew</div>
+        <div class="section-title" style="margin-bottom:0">The Crew</div>
       </div>
       <span class="toggle-arrow open" id="arrow-crew">▲</span>
     </div>
@@ -718,211 +724,159 @@ body {
     </div>
   </div>
 
-  <!-- NIAMH STATS -->
-  <div class="niamh-stats-section">
+  <!-- ═══ SECTION: NIAMH STATS ═══ -->
+  <div class="section-block niamh-stats-section">
     <div class="niamh-stats-inner">
-      <div class="section-toggle" onclick="toggleSection('stats')">
+      <div class="section-toggle-bar" onclick="toggleSection('stats')">
         <div>
           <div class="section-eyebrow" style="color:var(--faded)">✦ THE NIAMH FILES ✦</div>
-          <div class="section-title">By the numbers</div>
+          <div class="section-title" style="margin-bottom:0">By the numbers</div>
         </div>
         <span class="toggle-arrow open" id="arrow-stats">▲</span>
       </div>
       <div class="section-body" id="body-stats">
         <div class="niamh-stats-grid" id="niamh-stats-grid"></div>
       </div>
-      <div class="add-idea-row">
-        <div class="emoji-picker-wrap">
-          <button class="emoji-trigger" id="emoji-trigger" onclick="toggleEmojiPicker()">💡</button>
-          <div class="emoji-picker" id="emoji-picker" style="display:none"></div>
-        </div>
-        <input type="text" id="new-idea-input" placeholder="add your own idea…" onkeydown="if(event.key==='Enter')addIdea()">
-        <button class="trail-btn" onclick="addIdea()" style="background:var(--paper);font-size:.85rem;padding:7px 14px">+ Add</button>
-      </div>
-      </div><!-- end section-body -->
     </div>
   </div>
 
   <hr class="trail-divider">
 
-  <!-- Main -->
-  <!-- IDEAS SECTION -->
+  <!-- ═══ SECTION: EXPEDITION IDEAS ═══ -->
   <div class="ideas-section">
     <div class="ideas-section-inner">
-      <div class="section-toggle" onclick="toggleSection('ideas')" style="margin-bottom:.75rem">
+      <div class="section-toggle-bar" onclick="toggleSection('ideas')" style="margin-bottom:.75rem">
         <div class="ideas-eyebrow" style="margin-bottom:0">✦ EXPEDITION IDEAS ✦</div>
         <span class="toggle-arrow open" id="arrow-ideas" style="color:rgba(255,255,255,.6)">▲</span>
       </div>
       <div class="section-body" id="body-ideas">
-      <div class="ideas-row" id="ideas-row">
-        <div class="idea-card">
-          <div class="idea-icon">🪢</div>
-          <div class="idea-label">Shibari</div>
-          <div class="idea-avatars">
-            <img class="idea-av" src="avatars/niamh.jpg" onerror="tryIdeaAv(this,'niamh')" title="Niamh">
-            <img class="idea-av" src="avatars/dan.jpg" onerror="tryIdeaAv(this,'dan')" title="Dan">
-            <img class="idea-av" src="avatars/rawan.jpg" onerror="tryIdeaAv(this,'rawan')" title="Rawan">
-            <img class="idea-av" src="avatars/youri.jpg" onerror="tryIdeaAv(this,'youri')" title="Youri">
-            <img class="idea-av" src="avatars/clara.jpg" onerror="tryIdeaAv(this,'clara')" title="Clara">
+        <div class="ideas-row" id="ideas-row"></div>
+        <div class="add-idea-row">
+          <div class="emoji-picker-wrap">
+            <button class="emoji-trigger" id="emoji-trigger" onclick="toggleEmojiPicker()">💡</button>
+            <div class="emoji-picker" id="emoji-picker" style="display:none"></div>
+          </div>
+          <input type="text" id="new-idea-input" placeholder="add your own idea…" onkeydown="if(event.key==='Enter')addIdea()">
+          <button class="trail-btn" onclick="addIdea()" style="background:var(--paper);font-size:.85rem;padding:7px 14px">+ Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="trail-divider">
+
+  <!-- ═══ SECTION: CALENDAR ═══ -->
+  <div class="section-block" style="background:var(--paper2)">
+    <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem">
+      <div class="section-toggle-bar" onclick="toggleSection('calendar')" style="border-bottom:1px solid rgba(44,26,8,.1);margin-bottom:0">
+        <div>
+          <div class="section-eyebrow" style="color:var(--faded)">✦ THE CALENDAR ✦</div>
+          <div class="section-title" style="margin-bottom:0">Events & waypoints</div>
+        </div>
+        <span class="toggle-arrow open" id="arrow-calendar">▲</span>
+      </div>
+    </div>
+    <div class="section-body" id="body-calendar">
+      <div class="page">
+        <div class="sidebar">
+          <div class="next-card pop">
+            <div class="next-eyebrow">✦ NEXT WAYPOINT ✦</div>
+            <div id="next-card-inner"></div>
+          </div>
+          <div class="waypoints">
+            <div class="waypoint pop pop-d1"><div class="waypoint-val" id="s-total">—</div><div class="waypoint-lbl">logged</div></div>
+            <div class="waypoint pop pop-d2"><div class="waypoint-val" id="s-upcoming">—</div><div class="waypoint-lbl">ahead</div></div>
+            <div class="waypoint pop pop-d3"><div class="waypoint-val" id="s-month">—</div><div class="waypoint-lbl">this month</div></div>
+          </div>
+          <div class="explog pop" id="lb-wrap" style="display:none">
+            <div class="explog-title">✦ EXPEDITION LOG — WHO SHOWS UP ✦</div>
+            <div id="lb-list"></div>
           </div>
         </div>
-        <div class="idea-card">
-          <div class="idea-icon">👗</div>
-          <div class="idea-label">Legally Blonde Musical<span class="idea-sub">(in Swedish)</span></div>
-          <div class="idea-avatars">
-            <img class="idea-av" src="avatars/niamh.jpg" onerror="tryIdeaAv(this,'niamh')" title="Niamh">
-            <img class="idea-av" src="avatars/dan.jpg" onerror="tryIdeaAv(this,'dan')" title="Dan">
-            <img class="idea-av" src="avatars/rawan.jpg" onerror="tryIdeaAv(this,'rawan')" title="Rawan">
-            <img class="idea-av" src="avatars/youri.jpg" onerror="tryIdeaAv(this,'youri')" title="Youri">
-            <img class="idea-av" src="avatars/clara.jpg" onerror="tryIdeaAv(this,'clara')" title="Clara">
+        <div class="main">
+          <div class="field-card pop">
+            <div class="field-title">📍 Upcoming Waypoints</div>
+            <div class="event-list" id="upcoming-list"></div>
           </div>
-        </div>
-        <div class="idea-card">
-          <div class="idea-icon">🚴</div>
-          <div class="idea-label">Cycling Trip</div>
-          <div class="idea-avatars">
-            <img class="idea-av" src="avatars/dan.jpg" onerror="tryIdeaAv(this,'dan')" title="Dan">
-            <img class="idea-av" src="avatars/niamh.jpg" onerror="tryIdeaAv(this,'niamh')" title="Niamh">
-          </div>
-        </div>
-        <div class="idea-card">
-          <div class="idea-icon">🌲</div>
-          <div class="idea-label">Cabin in the Woods</div>
-          <div class="idea-avatars">
-            <img class="idea-av" src="avatars/niamh.jpg" onerror="tryIdeaAv(this,'niamh')" title="Niamh">
-            <img class="idea-av" src="avatars/dan.jpg" onerror="tryIdeaAv(this,'dan')" title="Dan">
-            <img class="idea-av" src="avatars/rawan.jpg" onerror="tryIdeaAv(this,'rawan')" title="Rawan">
-            <img class="idea-av" src="avatars/youri.jpg" onerror="tryIdeaAv(this,'youri')" title="Youri">
-            <img class="idea-av" src="avatars/clara.jpg" onerror="tryIdeaAv(this,'clara')" title="Clara">
+          <div class="field-card pop">
+            <div class="field-title">🕰 Past Expeditions</div>
+            <div class="event-list" id="recent-list"></div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem">
-    <div class="section-toggle" onclick="toggleSection('calendar')" style="padding:.875rem 0;border-bottom:1px solid rgba(44,26,8,.1)">
-      <div>
-        <div class="section-eyebrow" style="color:var(--faded)">✦ THE CALENDAR ✦</div>
-        <div class="section-title" style="margin-bottom:0">Events & waypoints</div>
-      </div>
-      <span class="toggle-arrow open" id="arrow-calendar">▲</span>
-    </div>
-  </div>
-  <div class="section-body" id="body-calendar">
-  <div class="page">
-    <div class="sidebar">
-
-      <!-- Next event -->
-      <div class="next-card pop">
-        <div class="next-eyebrow">✦ NEXT WAYPOINT ✦</div>
-        <div id="next-card-inner"></div>
-      </div>
-
-      <!-- Waypoints / stats -->
-      <div class="waypoints">
-        <div class="waypoint pop pop-d1"><div class="waypoint-val" id="s-total">—</div><div class="waypoint-lbl">logged</div></div>
-        <div class="waypoint pop pop-d2"><div class="waypoint-val" id="s-upcoming">—</div><div class="waypoint-lbl">ahead</div></div>
-        <div class="waypoint pop pop-d3"><div class="waypoint-val" id="s-month">—</div><div class="waypoint-lbl">this month</div></div>
-      </div>
-
-      <!-- Expedition log / leaderboard -->
-      <div class="explog pop" id="lb-wrap" style="display:none">
-        <div class="explog-title">✦ EXPEDITION LOG — WHO SHOWS UP ✦</div>
-        <div id="lb-list"></div>
-      </div>
-
-    </div>
-
-    <div class="main">
-      <div class="field-card pop">
-        <div class="field-title">📍 Upcoming Waypoints</div>
-        <div class="event-list" id="upcoming-list"></div>
-      </div>
-
-      <div class="field-card pop">
-        <div class="field-title">🕰 Past Expeditions</div>
-        <div class="event-list" id="recent-list"></div>
-      </div>
-
-
-    </div>
-  </div>
-
-  </div><!-- end body-calendar -->
-
-  <!-- TRAIL GAME -->
+  <!-- ═══ SECTION: TRAIL GAME ═══ -->
   <div class="game-section">
     <div class="game-inner">
-      <div class="section-toggle" onclick="toggleSection('game')">
+      <div class="section-toggle-bar" onclick="toggleSection('game')">
         <div>
           <div class="section-eyebrow" style="color:var(--faded)">✦ EXPEDITION GAME ✦</div>
-          <div class="section-title">The Trail Challenge</div>
+          <div class="section-title" style="margin-bottom:0">The Trail Challenge</div>
         </div>
         <span class="toggle-arrow open" id="arrow-game">▲</span>
       </div>
       <div class="section-body" id="body-game">
 
-      <!-- Player select screen -->
-      <div id="game-setup">
-        <p class="game-setup-sub">who's playing tonight?</p>
-        <div class="player-grid" id="player-grid"></div>
-        <div class="add-player-row">
-          <input type="text" id="new-player-input" placeholder="add someone else…" onkeydown="if(event.key==='Enter')addCustomPlayer()">
-          <button class="trail-btn" onclick="addCustomPlayer()" style="padding:6px 14px;font-size:.8rem">+ Add</button>
-        </div>
-        <div class="celeb-scores" id="cumulative-scores" style="margin-top:.75rem;margin-bottom:.25rem"></div>
-        <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;margin-top:1.25rem">
-          <button class="trail-btn" onclick="startGame()">Start Expedition →</button>
-          <button class="trail-btn" onclick="clearScores()" style="background:var(--paper2);color:var(--ink);font-size:.75rem">Reset scores</button>
-        </div>
-      </div>
-
-      <!-- Map screen -->
-      <div id="game-map" style="display:none">
-        <div class="map-players-bar" id="map-players-bar"></div>
-        <div class="map-wrap">
-          <svg id="trail-svg" viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg"></svg>
-        </div>
-        <div class="turn-banner" id="turn-banner"></div>
-        <p class="map-hint" id="map-hint">Click a location to travel there</p>
-      </div>
-
-      <!-- Challenge popup -->
-      <div id="challenge-overlay" style="display:none">
-        <div class="challenge-card" id="challenge-card">
-          <div class="challenge-type" id="challenge-type"></div>
-          <div class="challenge-player" id="challenge-player" style="display:flex;align-items:center;justify-content:center;gap:10px"></div>
-          <div class="challenge-text" id="challenge-text"></div>
-          <div class="challenge-btns" id="challenge-btns">
-            <button class="chal-btn success" onclick="resolveChallenge(true)">✓ Nailed it</button>
-            <button class="chal-btn fail" onclick="resolveChallenge(false)">✗ Failed</button>
+        <!-- Player select screen -->
+        <div id="game-setup">
+          <p class="game-setup-sub">who's playing tonight?</p>
+          <div class="player-grid" id="player-grid"></div>
+          <div class="add-player-row">
+            <input type="text" id="new-player-input" placeholder="add someone else…" onkeydown="if(event.key==='Enter')addCustomPlayer()">
+            <button class="trail-btn" onclick="addCustomPlayer()" style="padding:6px 14px;font-size:.8rem">+ Add</button>
+          </div>
+          <div class="celeb-scores" id="cumulative-scores" style="margin-top:.75rem;margin-bottom:.25rem"></div>
+          <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;margin-top:1.25rem">
+            <button class="trail-btn" onclick="startGame()">Start Expedition →</button>
+            <button class="trail-btn" onclick="clearScores()" style="background:var(--paper2);color:var(--ink);font-size:.75rem">Reset scores</button>
           </div>
         </div>
-      </div>
 
-      <!-- Celebration screen -->
-      <div id="game-celebration" style="display:none">
-        <div class="celebration-card">
-          <div class="celeb-emoji" id="celeb-emoji">🏕️</div>
-          <div class="celeb-title" id="celeb-title">Base Camp Reached!</div>
-          <div class="celeb-sub" id="celeb-sub"></div>
-          <!-- Winner polaroid with video -->
-          <div class="winner-polaroid" id="winner-polaroid" style="display:none">
-            <div class="winner-polaroid-inner">
-              <video id="winner-video" autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;display:block;"></video>
+        <!-- Map screen -->
+        <div id="game-map" style="display:none">
+          <div class="map-players-bar" id="map-players-bar"></div>
+          <div class="map-wrap">
+            <svg id="trail-svg" viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg"></svg>
+          </div>
+          <div class="turn-banner" id="turn-banner"></div>
+          <p class="map-hint" id="map-hint">Click a location to travel there</p>
+        </div>
+
+        <!-- Challenge popup -->
+        <div id="challenge-overlay" style="display:none">
+          <div class="challenge-card" id="challenge-card">
+            <div class="challenge-type" id="challenge-type"></div>
+            <div class="challenge-player" id="challenge-player" style="display:flex;align-items:center;justify-content:center;gap:10px"></div>
+            <div class="challenge-text" id="challenge-text"></div>
+            <div class="challenge-btns" id="challenge-btns">
+              <button class="chal-btn success" onclick="resolveChallenge(true)">✓ Nailed it</button>
+              <button class="chal-btn fail" onclick="resolveChallenge(false)">✗ Failed</button>
             </div>
-            <div class="winner-polaroid-label" id="winner-polaroid-label"></div>
           </div>
-          <div class="celeb-scores" id="celeb-scores"></div>
-          <button class="trail-btn" onclick="resetGame()" style="margin-top:1.5rem">↺ New Expedition</button>
         </div>
-      </div>
 
-    </div>
-  </div>
-</div>
+        <!-- Celebration screen -->
+        <div id="game-celebration" style="display:none">
+          <div class="celebration-card">
+            <div class="celeb-emoji" id="celeb-emoji">🏕️</div>
+            <div class="celeb-title" id="celeb-title">Base Camp Reached!</div>
+            <div class="celeb-sub" id="celeb-sub"></div>
+            <div class="winner-polaroid" id="winner-polaroid" style="display:none">
+              <div class="winner-polaroid-inner">
+                <video id="winner-video" autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;display:block;"></video>
+              </div>
+              <div class="winner-polaroid-label" id="winner-polaroid-label"></div>
+            </div>
+            <div class="celeb-scores" id="celeb-scores"></div>
+            <button class="trail-btn" onclick="resetGame()" style="margin-top:1.5rem">↺ New Expedition</button>
+          </div>
+        </div>
 
+      </div><!-- end body-game -->
+    </div><!-- end game-inner -->
+  </div><!-- end game-section -->
 <script>
 // ============================================================
 //  CALENDAR — Cloudflare worker URL
@@ -2166,7 +2120,7 @@ async function loadIdeas() {
     if (!res.ok) return;
     const ideas = await res.json();
     savedIdeas = ideas;
-    ideas.forEach((idea, i) => renderIdeaCard(idea.emoji||'💡', idea.text, i + 4, i));
+    ideas.forEach((idea, i) => renderIdeaCard(idea.emoji||'💡', idea.text, i, i));
   } catch(e) { console.log('Could not load ideas:', e.message); }
 }
 
@@ -2203,7 +2157,7 @@ async function addIdea() {
 
   const newIdx = savedIdeas.length;
   savedIdeas.push({ text, emoji });
-  renderIdeaCard(emoji, text, newIdx + 4, newIdx);
+  renderIdeaCard(emoji, text, newIdx, newIdx);
 
   try {
     await fetch(IDEAS_URL, {
@@ -2324,9 +2278,8 @@ function rerenderIdeas() {
   const row = document.getElementById('ideas-row');
   if (!row) return;
   // Remove cards beyond the 4 preset ones
-  const cards = row.querySelectorAll('.idea-card');
-  cards.forEach((c,i) => { if(i >= 4) c.remove(); });
-  savedIdeas.forEach((idea, i) => renderIdeaCard(idea.emoji||'💡', idea.text, i + 4, i));
+  row.innerHTML = '';
+  savedIdeas.forEach((idea, i) => renderIdeaCard(idea.emoji||'💡', idea.text, i, i));
 }
 
 window.addEventListener('DOMContentLoaded', () => {
